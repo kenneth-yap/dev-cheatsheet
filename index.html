@@ -1,0 +1,2730 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Cheatsheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+:root {
+  --bg:#0F1117;--surface:#181B26;--surface2:#1E2235;--surface3:#252A40;
+  --border:#2D3354;--text:#E2E8F4;--text2:#8B95B0;--text3:#4D566E;
+  --accent:#7C8CF8;--accent-bg:rgba(124,140,248,0.12);
+  --green:#4ADE80;--green-bg:rgba(74,222,128,0.10);
+  --red:#F87171;--red-bg:rgba(248,113,113,0.10);
+  --amber:#FBBF24;--amber-bg:rgba(251,191,36,0.10);
+  --teal:#2DD4BF;--teal-bg:rgba(45,212,191,0.10);
+  --mono:'JetBrains Mono',Consolas,'Courier New',monospace;
+  --sans:'Inter',system-ui,sans-serif;--radius:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;min-height:100vh}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+
+.app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+@media(max-width:780px){.app{grid-template-columns:1fr}}
+
+.sidebar{background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;padding:0 0 32px}
+@media(max-width:780px){.sidebar{display:none}}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.sidebar-logo span{font-weight:700;font-size:16px;color:var(--text)}
+.sidebar-logo em{display:block;font-style:normal;font-size:12px;color:var(--text3);margin-top:2px}
+.nav-section{padding:0 12px;margin-bottom:4px}
+.nav-section-label{font-size:10.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);padding:8px 8px 4px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;font-size:13.5px;color:var(--text2);cursor:pointer;transition:background 0.12s,color 0.12s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-bg);color:var(--accent);font-weight:500}
+.nav-item .icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nav-sub{padding-left:36px}
+.nav-sub .nav-item{font-size:12.5px;padding:5px 8px}
+
+.main{padding:40px 48px 80px;max-width:900px}
+@media(max-width:780px){.main{padding:24px 20px 60px}}
+
+.mobile-tabs{display:none;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--border);padding:0 12px}
+@media(max-width:780px){.mobile-tabs{display:flex}}
+.mobile-tab{flex-shrink:0;padding:12px 14px;font-size:12px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.mobile-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+.section{display:none}
+.section.active{display:block}
+.section-header{margin-bottom:36px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.section-title{font-size:26px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px}
+.section-intro{font-size:14px;color:var(--text2);max-width:65ch;line-height:1.65}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.card-title{font-size:14.5px;font-weight:600}
+.card-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.card-body{padding:14px 18px}
+.card-body p{font-size:13.5px;color:var(--text2);margin-bottom:10px;line-height:1.65}
+.card-body p:last-child{margin-bottom:0}
+.card-body p strong{color:var(--text)}
+.card-body ul,.card-body ol{font-size:13.5px;color:var(--text2);padding-left:20px;margin-bottom:10px}
+.card-body li{margin-bottom:4px;line-height:1.65}
+.card-body li strong{color:var(--text)}
+
+.group-title{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin:32px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+
+.code-wrap{margin:10px 0;overflow:hidden;border-radius:var(--radius);border:1px solid var(--border)}
+.code-label{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-bottom:1px solid var(--border);padding:7px 14px;font-size:11.5px;font-weight:600;color:var(--text2);font-family:var(--mono)}
+.code-label.good{background:var(--green-bg);color:var(--green)}
+.code-label.bad{background:var(--red-bg);color:var(--red)}
+.code-label.info{background:var(--accent-bg);color:var(--accent)}
+.copy-btn{background:var(--surface3);border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:11px;padding:2px 8px;cursor:pointer;font-family:var(--mono);transition:all 0.12s}
+.copy-btn:hover{background:var(--accent-bg);color:var(--accent)}
+pre{margin:0;overflow-x:auto}
+pre code{display:block;padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.75;background:var(--bg);color:var(--text)}
+
+.hljs-keyword{color:#C3A6FF}.hljs-string{color:#A6E3A1}.hljs-comment{color:#4D566E;font-style:italic}
+.hljs-number{color:#FAB387}.hljs-function,.hljs-title{color:#89B4FA}.hljs-params{color:#E2E8F4}
+.hljs-built_in{color:#89DCEB}.hljs-attr{color:#CBA6F7}.hljs-variable{color:#E2E8F4}
+.hljs-operator{color:#C3A6FF}.hljs-punctuation{color:#8B95B0}.hljs-type{color:#89DCEB}
+.hljs-literal{color:#FAB387}.hljs-property{color:#CDD6F4}.hljs-name{color:#89B4FA}
+.hljs-tag{color:#F38BA8}.hljs-selector-class{color:#A6E3A1}.hljs-meta{color:#A6E3A1}
+
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;letter-spacing:0.03em}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-blue{background:var(--accent-bg);color:var(--accent)}
+
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+@media(max-width:640px){.diff-grid{grid-template-columns:1fr}}
+.diff-grid .code-wrap{margin:0}
+
+.alert{border-left:3px solid;border-radius:0 var(--radius) var(--radius) 0;padding:11px 14px;margin:10px 0;font-size:13px;color:var(--text2)}
+.alert strong{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px}
+.alert.tip{border-color:var(--green);background:var(--green-bg)}.alert.tip strong{color:var(--green)}
+.alert.warn{border-color:var(--amber);background:var(--amber-bg)}.alert.warn strong{color:var(--amber)}
+.alert.danger{border-color:var(--red);background:var(--red-bg)}.alert.danger strong{color:var(--red)}
+.alert.info{border-color:var(--accent);background:var(--accent-bg)}.alert.info strong{color:var(--accent)}
+
+code:not(pre code){font-family:var(--mono);font-size:12px;background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:4px}
+
+table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+th{background:var(--surface2);color:var(--text3);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;padding:8px 12px;border:1px solid var(--border);text-align:left}
+td{padding:10px 12px;border:1px solid var(--border);color:var(--text2);vertical-align:top}
+td strong,td code{color:var(--text)}
+td:first-child{font-family:var(--mono);font-size:12px}
+tr:nth-child(even) td{background:var(--surface)}
+
+hr{border:none;border-top:1px solid var(--border);margin:28px 0}
+
+.nav-category{padding:20px 20px 4px;font-size:9.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);border-top:1px solid var(--border);margin-top:4px}
+.nav-category:first-child{border-top:none;padding-top:12px}
+</style>
+</head>
+<body>
+
+<div class="mobile-tabs">
+  <div class="mobile-tab active" onclick="showSection('git',this)">Git</div>
+  <div class="mobile-tab" onclick="showSection('docker',this)">Docker</div>
+  <div class="mobile-tab" onclick="showSection('sql',this)">SQL</div>
+  <div class="mobile-tab" onclick="showSection('python',this)">Python</div>
+  <div class="mobile-tab" onclick="showSection('typescript',this)">TypeScript</div>
+  <div class="mobile-tab" onclick="showSection('react',this)">React</div>
+  <div class="mobile-tab" onclick="showSection('setup',this)">Setup</div>
+  <div class="mobile-tab" onclick="showSection('patterns',this)">Patterns</div>
+  <div class="mobile-tab" onclick="showSection('running',this)">Run App</div>
+</div>
+
+<div class="app">
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span>Dev Cheatsheet</span>
+    <em>Personal reference — Sept 2026</em>
+  </div>
+
+  <!-- ── Category: Language & Tool Reference ── -->
+  <div class="nav-category">Language &amp; Tool Reference</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Git &amp; GitHub</div>
+    <button class="nav-item active" onclick="showSection('git',this)"><span class="icon">🌿</span>Commands &amp; Workflow</button>
+    <div class="nav-sub">
+      <button class="nav-item" onclick="showSection('git',this);anchorTo('git-mistakes')"><span class="icon">⚠️</span>Mistake recovery</button>
+      <button class="nav-item" onclick="showSection('git',this);anchorTo('git-cicd')"><span class="icon">⚙️</span>CI/CD</button>
+      <button class="nav-item" onclick="showSection('git',this);anchorTo('git-worktrees')"><span class="icon">🌲</span>Worktrees</button>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">Docker</div>
+    <button class="nav-item" onclick="showSection('docker',this)"><span class="icon">🐳</span>Containers &amp; Commands</button>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">SQL / PostgreSQL</div>
+    <button class="nav-item" onclick="showSection('sql',this)"><span class="icon">🗄️</span>Databases &amp; Migrations</button>
+    <div class="nav-sub">
+      <button class="nav-item" onclick="showSection('sql',this);anchorTo('sql-inspect')"><span class="icon">🔍</span>Inspecting tables</button>
+      <button class="nav-item" onclick="showSection('sql',this);anchorTo('sql-migrations')"><span class="icon">📦</span>Alembic / migrations</button>
+      <button class="nav-item" onclick="showSection('sql',this);anchorTo('sql-sqlalchemy')"><span class="icon">🔗</span>SQLAlchemy</button>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">Python</div>
+    <button class="nav-item" onclick="showSection('python',this)"><span class="icon">🐍</span>Async &amp; Function formats</button>
+    <div class="nav-sub">
+      <button class="nav-item" onclick="showSection('python',this);anchorTo('py-sync')"><span class="icon">⚡</span>Sync vs Async</button>
+      <button class="nav-item" onclick="showSection('python',this);anchorTo('py-generators')"><span class="icon">🔄</span>Generators</button>
+      <button class="nav-item" onclick="showSection('python',this);anchorTo('py-asyncio')"><span class="icon">🧵</span>asyncio &amp; threads</button>
+      <button class="nav-item" onclick="showSection('python',this);anchorTo('py-driverhandle')"><span class="icon">🪟</span>Windows event loops</button>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">TypeScript</div>
+    <button class="nav-item" onclick="showSection('typescript',this)"><span class="icon">📘</span>Types &amp; imports</button>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">React</div>
+    <button class="nav-item" onclick="showSection('react',this)"><span class="icon">⚛️</span>Component patterns</button>
+    <div class="nav-sub">
+      <button class="nav-item" onclick="showSection('react',this);anchorTo('react-class')"><span class="icon">🏛️</span>Class components</button>
+      <button class="nav-item" onclick="showSection('react',this);anchorTo('react-hooks')"><span class="icon">🪝</span>Hooks</button>
+      <button class="nav-item" onclick="showSection('react',this);anchorTo('react-patterns')"><span class="icon">🧩</span>Patterns</button>
+      <button class="nav-item" onclick="showSection('react',this);anchorTo('react-perf')"><span class="icon">⚡</span>useCallback / useMemo</button>
+    </div>
+  </div>
+
+  <!-- ── Category: Architecture & Patterns ── -->
+  <div class="nav-category">Architecture &amp; Patterns</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Patterns</div>
+    <button class="nav-item" onclick="showSection('patterns',this)"><span class="icon">🏗️</span>Architecture &amp; Fixes</button>
+    <div class="nav-sub">
+      <button class="nav-item" onclick="showSection('patterns',this);anchorTo('pat-sse')"><span class="icon">📡</span>SSE streaming</button>
+      <button class="nav-item" onclick="showSection('patterns',this);anchorTo('pat-fastapi')"><span class="icon">🚀</span>FastAPI routes</button>
+      <button class="nav-item" onclick="showSection('patterns',this);anchorTo('pat-fastapi-adv')"><span class="icon">📋</span>FastAPI advanced</button>
+      <button class="nav-item" onclick="showSection('patterns',this);anchorTo('pat-search')"><span class="icon">🔎</span>Hybrid search</button>
+      <button class="nav-item" onclick="showSection('patterns',this);anchorTo('pat-amr')"><span class="icon">🔑</span>OAuth AMR / prompt cache</button>
+      <button class="nav-item" onclick="showSection('patterns',this);anchorTo('pat-security')"><span class="icon">🔒</span>Security rules</button>
+    </div>
+  </div>
+
+  <!-- ── Category: Local Dev & Operations ── -->
+  <div class="nav-category">Local Dev &amp; Operations</div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Dev Setup</div>
+    <button class="nav-item" onclick="showSection('setup',this)"><span class="icon">🖥️</span>Windows &amp; Local Setup</button>
+    <div class="nav-sub">
+      <button class="nav-item" onclick="showSection('setup',this);anchorTo('setup-venv')"><span class="icon">🐍</span>Python venv</button>
+      <button class="nav-item" onclick="showSection('setup',this);anchorTo('setup-env')"><span class="icon">🔑</span>.env &amp; secrets</button>
+      <button class="nav-item" onclick="showSection('setup',this);anchorTo('setup-localdev')"><span class="icon">⚙️</span>Local dev env vars</button>
+      <button class="nav-item" onclick="showSection('setup',this);anchorTo('setup-ps')"><span class="icon">💻</span>PowerShell gotchas</button>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-section-label">Running the App</div>
+    <button class="nav-item" onclick="showSection('running',this)"><span class="icon">▶️</span>Start / stop / debug</button>
+    <div class="nav-sub">
+      <button class="nav-item" onclick="showSection('running',this);anchorTo('run-backend')"><span class="icon">🐍</span>Backend commands</button>
+      <button class="nav-item" onclick="showSection('running',this);anchorTo('run-frontend')"><span class="icon">⚛️</span>Frontend commands</button>
+      <button class="nav-item" onclick="showSection('running',this);anchorTo('run-trouble')"><span class="icon">🔧</span>Troubleshooting</button>
+    </div>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- ════════════════════════ GIT ════════════════════════ -->
+<div class="section active" id="section-git">
+  <div class="section-header">
+    <div class="section-title">Git &amp; GitHub</div>
+    <div class="section-intro">Real commands from real mistakes — wrong branch commits, undoing work, CI/CD, cherry-pick, and the worktree pattern used in this project.</div>
+  </div>
+
+  <div class="group-title">Everyday workflow</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">New feature from scratch — the full loop</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">git checkout main
+git pull
+git checkout -b feat/my-feature
+
+# ... make changes ...
+
+git status
+git add path/to/file.py        # stage specific files (NEVER git add -A blindly)
+git diff --staged              # review before committing
+git commit -m "feat: add X to Y"
+git push -u origin feat/my-feature</code></pre></div>
+      <div class="alert tip"><strong>Rule</strong> Stage specific files, not everything. <code>git add -A</code> can accidentally include <code>.env</code> files with real API keys.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Commit message format</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">format</div><pre><code class="language-bash">type(scope): short description
+
+# Types:
+feat     - new feature
+fix      - bug fix
+chore    - maintenance, dependencies
+test     - test changes only
+docs     - documentation only
+refactor - restructuring with no behaviour change
+
+# Real examples from this project:
+fix(tests): update test suite for async stream and usage schema changes
+feat(stream): add per-tenant concurrency limit to SSE poller
+fix(library_search): replace numpy loop with pgvector <=> operator</code></pre></div>
+    </div>
+  </div>
+
+  <div id="git-mistakes" class="group-title">⚠️ Mistake recovery</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Committed to the wrong branch</div></div></div>
+    <div class="card-body">
+      <p><strong>Method A — Move commits to a new branch (safest):</strong></p>
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">git checkout -b feat/my-feature    # create the correct branch HERE (has your commits)
+git checkout main
+git reset --hard origin/main       # remove wrong commits from main</code></pre></div>
+      <p><strong>Method B — Cherry-pick to an existing branch</strong> (move one specific commit):</p>
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">git log --oneline                  # find the commit hash, e.g. abc1234
+git checkout feat/existing-branch
+git cherry-pick abc1234            # copies that commit here
+
+git checkout main
+git reset --hard origin/main       # remove from main</code></pre></div>
+      <div class="alert warn"><strong>Before any reset</strong> Run <code>git status</code> first. If there are uncommitted changes, stash them with <code>git stash push -u -m "my-wip"</code> before resetting.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Undoing commits — 3 levels</div></div></div>
+    <div class="card-body">
+      <table>
+        <thead><tr><th>Command</th><th>Keeps files?</th><th>Keeps staging?</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td><code>git reset --soft HEAD~1</code></td><td>Yes ✓</td><td>Yes ✓</td><td>Rewrite the commit message or combine commits</td></tr>
+          <tr><td><code>git reset HEAD~1</code></td><td>Yes ✓</td><td>No ✗</td><td>Re-stage and recommit differently (most common)</td></tr>
+          <tr><td><code>git reset --hard HEAD~1</code></td><td>No ✗</td><td>No ✗</td><td>Throw everything away — 100% certain you don't need it</td></tr>
+        </tbody>
+      </table>
+      <div class="alert danger"><strong>--hard is destructive</strong> Changes are gone forever. Use <code>git revert</code> instead if the commit was already pushed to remote.</div>
+      <div class="code-wrap"><div class="code-label">bash — safe undo for already-pushed commits</div><pre><code class="language-bash">git revert abc1234    # creates a NEW commit that undoes abc1234 — safe to push
+git push</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Stashing safely</div></div></div>
+    <div class="card-body">
+      <div class="alert warn"><strong>Never use bare <code>git stash pop</code></strong> in multi-session or worktree projects — you could pop someone else's stash. Always tag your stash.</div>
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">git stash push -u -m "my-unique-description"   # -u includes untracked files
+git stash list
+# stash@{0}: On main: my-unique-description
+
+git stash apply stash@{0}    # restore — NOT pop (keeps the stash safe)
+git stash drop stash@{0}     # drop manually when done</code></pre></div>
+      <p><strong>Preferred alternative:</strong> make a WIP commit and reset it later:</p>
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">git add path/to/work
+git commit -m "wip: in progress — do not merge"
+# switch branches, do other things...
+git reset HEAD~1              # undo the WIP commit, keep your file changes</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Cherry-pick — copy a specific commit to another branch</div><div class="card-sub">Used in this project to move library_search.py from a wrong branch to a clean one</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">git log --oneline             # find the commit hash you want to copy
+# e.g. d293d46 fix: rollback broken transaction before lexical fallback
+
+git checkout feat/clean-branch
+git cherry-pick d293d46       # copies just that commit onto this branch
+
+# If there's a conflict during cherry-pick:
+# fix the conflict, then:
+git add the-file.py
+git cherry-pick --continue    # or: git cherry-pick --abort to cancel</code></pre></div>
+      <p><strong>When to use vs rebase:</strong> cherry-pick copies one or a few specific commits. Rebase replays an entire branch. For "I made this commit in the wrong place and want it here", cherry-pick is the right tool.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Merge conflicts</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">git merge main              # conflict — git shows which files are conflicted
+git status                  # shows "both modified" files
+
+# In the conflicted file you'll see:
+# <<<<<<< HEAD
+# your version
+# =======
+# incoming version
+# >>>>>>> main
+
+# Edit the file to the correct final state, then:
+git add the-file.py
+git merge --continue        # or: git commit</code></pre></div>
+      <div class="alert danger"><strong>Never escape a conflict with</strong> <code>git checkout -- .</code> or <code>git restore .</code> — you'll lose your work. Always resolve the file first.</div>
+    </div>
+  </div>
+
+  <div id="git-cicd" class="group-title">⚙️ CI/CD — GitHub Actions</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">How to read a CI failure</div></div></div>
+    <div class="card-body">
+      <ol>
+        <li>Go to the failing PR → click the red ✗ next to the failing step → click Details</li>
+        <li>Find the first <code>FAILED</code> or <code>ERROR</code> line (not the summary at the bottom)</li>
+        <li><strong>Group all failures by error type before touching any code.</strong> 14 test failures → 4 root causes → 4 fixes (not 14)</li>
+        <li>If 0 tests collected → migration step failed, check that first</li>
+      </ol>
+      <div class="code-wrap"><div class="code-label">bash — run CI locally before pushing</div><pre><code class="language-bash">cd backend
+python -m pytest -q             # all tests, quiet output
+python -m pytest -x             # stop at first failure
+python -m pytest tests/test_stream_api.py -v   # one file, verbose</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">GitHub Actions workflow anatomy</div><div class="card-sub">.github/workflows/ci.yml</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">yaml</div><pre><code class="language-yaml">name: CI
+on:
+  push:
+    branches: [main, "fix/*", "feat/*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:pg17   # NOT plain postgres — needs vector extension
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: scribtive_test
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt
+      - run: alembic upgrade head          # migrations first
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost/scribtive_test
+      - run: python -m pytest -q</code></pre></div>
+      <div class="alert info"><strong>Image matters</strong> <code>pgvector/pgvector:pg17</code> not <code>postgres:17</code>. Plain Postgres has no <code>vector</code> extension. Wrong image = migration fails = 0 tests.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">When production code changes — what to update in tests</div><div class="card-sub">4 patterns to grep for when a function's return type, shape, or arguments change</div></div></div>
+    <div class="card-body">
+      <p>When you change a function (return type, rename a field, change arguments), tests break in predictable ways. Search for these 4 patterns before running CI:</p>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Pattern to search for</th><th>Why it breaks</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>list(fn())</code></td><td>If <code>fn</code> is now async, <code>list()</code> wraps the coroutine object — you get a list with one coroutine, not the items</td><td>Change to <code>await fn()</code> or <code>[x async for x in fn()]</code></td></tr>
+          <tr><td><code>"old_field" in result</code></td><td>Field was renamed in the return dict/object</td><td>Update to the new field name</td></tr>
+          <tr><td><code>assert result == {old_fields_only}</code></td><td>New fields were added to the return value — the dict no longer matches exactly</td><td>Assert individual keys or update the expected dict to include new fields</td></tr>
+          <tr><td><code>assert_called_with(old_args)</code></td><td>Function signature or argument names changed</td><td>Update the expected args in the test assertion</td></tr>
+        </tbody>
+      </table></div>
+      <div class="code-wrap"><div class="code-label">bash — grep commands to run after changing production code</div><pre><code class="language-bash">grep -rn "list(search_shelf" tests/        # 1. list() wrapping async gen
+grep -rn "\"embedding\" in " tests/       # 2. old field name
+grep -rn "assert result ==" tests/        # 3. exact dict equality
+grep -rn "assert_called_with" tests/      # 4. call argument assertions</code></pre></div>
+    </div>
+  </div>
+
+  <div id="git-worktrees" class="group-title">🌲 Worktrees</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">What worktrees are and when to use them</div></div></div>
+    <div class="card-body">
+      <p>A second checkout of the same repo in a different folder, on a different branch. Both share the same git history. Used in this project so Claude Code can work in isolation without disturbing the main checkout.</p>
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">git worktree add ../my-feature-copy feat/my-feature   # create
+git worktree list       # see all worktrees
+git worktree remove ../my-feature-copy   # clean up</code></pre></div>
+      <div class="alert info"><strong>Shared stash</strong> All worktrees share the same stash stack. Always tag your stashes — never <code>git stash pop</code>.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ DOCKER ════════════════════════ -->
+<div class="section" id="section-docker">
+  <div class="section-header">
+    <div class="section-title">Docker</div>
+    <div class="section-intro">What each flag does and why. Focused on the database container pattern used in this project.</div>
+  </div>
+
+  <div class="group-title">docker run — flags explained</div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Starting the dev database</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">docker run \
+  -d \                              # detached: runs in background
+  --name scribtive-pg \             # name so you can reference it later
+  -e POSTGRES_PASSWORD=postgres \   # env var inside the container
+  -e POSTGRES_DB=scribtive_dev \    # create this database on startup
+  -p 5433:5432 \                    # host:container port mapping
+  pgvector/pgvector:pg16            # MUST be this image — has vector extension
+
+# First-time setup after container starts:
+docker exec scribtive-pg psql -U postgres -d scribtive_dev \
+  -c "CREATE ROLE scribtive_app;"   # role needed by the app</code></pre></div>
+      <table>
+        <thead><tr><th>Flag</th><th>What it does</th><th>Without it</th></tr></thead>
+        <tbody>
+          <tr><td><code>-d</code></td><td>Run in background (detached)</td><td>Terminal is taken over by logs</td></tr>
+          <tr><td><code>--name</code></td><td>Name the container</td><td>Random name like "silly_darwin"</td></tr>
+          <tr><td><code>-e KEY=val</code></td><td>Set env var inside container</td><td>Postgres won't start (needs a password)</td></tr>
+          <tr><td><code>-p 5433:5432</code></td><td>Map host 5433 → container 5432</td><td>Can't connect from your machine</td></tr>
+          <tr><td><code>-v data:/var/lib/postgresql</code></td><td>Named volume: data persists after container stops</td><td>Data wiped when container removed</td></tr>
+        </tbody>
+      </table>
+      <div class="alert warn"><strong>pgvector vs plain postgres</strong> <code>postgres:16</code> does NOT have <code>vector</code>. Wrong image = <code>CREATE EXTENSION vector</code> fails in migration = no tests run.</div>
+    </div>
+  </div>
+
+  <div class="group-title">Managing containers</div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Day-to-day commands</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">docker ps                        # running containers
+docker ps -a                     # ALL containers (including stopped)
+docker stop scribtive-pg         # graceful stop
+docker start scribtive-pg        # start a stopped container
+docker rm scribtive-pg           # delete (must be stopped)
+docker rm -f scribtive-pg        # force-delete even if running
+
+docker logs scribtive-pg         # stdout/stderr
+docker logs -f scribtive-pg      # follow in real time (Ctrl+C to stop)
+docker logs --tail 50 scribtive-pg
+
+docker exec -it scribtive-pg bash            # open shell inside
+docker exec scribtive-pg psql -U postgres -d scribtive_dev   # run psql directly
+
+docker images                    # list downloaded images
+docker rmi pgvector/pgvector:pg16   # delete an image</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">docker-compose vs docker run</div></div></div>
+    <div class="card-body">
+      <p><strong><code>docker run</code></strong> — one container. Use for a standalone local database.</p>
+      <p><strong><code>docker-compose up</code></strong> — reads <code>docker-compose.yml</code>, starts multiple containers together. In this project, <code>docker-compose up</code> builds the full production container connecting to Supabase. It does NOT start a local Postgres. For local dev, run backend and frontend separately.</p>
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">docker-compose up -d             # start all services in background
+docker-compose down              # stop + remove containers
+docker-compose logs backend      # logs for one service
+docker-compose build             # rebuild images after code changes</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Files saved inside a container are deleted on every redeploy</div><div class="card-sub">Critical architecture finding — affects any uploaded file storage</div></div></div>
+    <div class="card-body">
+      <div class="alert danger"><strong>Container filesystem is ephemeral.</strong> Every Elestio redeploy creates a fresh container from the image. Any files written to the container's local disk (e.g. <code>storage_root</code>, uploaded documents) are permanently deleted. This is a silent data loss bug — no error, the files just vanish.</div>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Before — files lost on every deploy</div>
+          <pre><code class="language-python"># config.py
+storage_root = "storage/"   # relative path
+                             # → inside the container
+                             # → deleted every redeploy</code></pre>
+          <pre><code class="language-yaml"># docker-compose.yml — no volumes
+services:
+  backend:
+    image: scribtive-backend
+    # files written to /app/storage/
+    # are gone after every redeploy</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ After — Option A: Docker named volume</div>
+          <pre><code class="language-yaml"># docker-compose.yml
+services:
+  backend:
+    image: scribtive-backend
+    volumes:
+      - uploads:/app/storage   # ← persist outside container
+
+volumes:
+  uploads:   # named volume survives redeploys</code></pre>
+          <pre><code class="language-python"># config.py
+storage_root = "/app/storage"  # absolute path
+                                # → mapped to named volume</code></pre>
+        </div>
+      </div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Fix</th><th>How</th><th>When to use</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Docker named volume</strong></td><td>Add <code>volumes: - uploads:/app/storage</code> to <code>docker-compose.yml</code></td><td>Simple; data lives on the host machine</td></tr>
+          <tr><td><strong>Supabase Storage</strong></td><td>Store files via Supabase Storage API; only store the reference URL in DB</td><td>Production-grade; survives any redeploy; CDN delivery</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>Rule of thumb:</strong> If a file needs to survive a deployment, it must live outside the container — in a volume or an external storage service.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ SQL ════════════════════════ -->
+<div class="section" id="section-sql">
+  <div class="section-header">
+    <div class="section-title">SQL / PostgreSQL</div>
+    <div class="section-intro">Setup, inspection, migrations, and SQLAlchemy patterns from this project.</div>
+  </div>
+
+  <div class="group-title">Setup</div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">First-time database creation</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash — 4 steps</div><pre><code class="language-bash"># 1. Start container
+docker run -d --name scribtive-pg \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=scribtive_dev \
+  -p 5433:5432 \
+  pgvector/pgvector:pg16
+
+# 2. Create the app role (run once)
+docker exec scribtive-pg psql -U postgres -d scribtive_dev \
+  -c "CREATE ROLE scribtive_app;"
+
+# 3. Set DATABASE_URL in backend/.env
+# DATABASE_URL=postgresql://postgres:postgres@localhost:5433/scribtive_dev
+
+# 4. Run migrations
+cd backend
+alembic upgrade head</code></pre></div>
+    </div>
+  </div>
+
+  <div id="sql-inspect" class="group-title">Inspecting the database with psql</div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">psql meta-commands</div><div class="card-sub">Backslash commands — no semicolon needed</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash — connect</div><pre><code class="language-bash">docker exec -it scribtive-pg psql -U postgres -d scribtive_dev</code></pre></div>
+      <div class="code-wrap"><div class="code-label">psql</div><pre><code class="language-sql">\l              -- list all databases
+\dt             -- list all tables
+\dt public.*    -- list tables in public schema
+\d tablename    -- describe a table (columns, types, constraints)
+\d+ tablename   -- describe + storage size and comments
+\di             -- list all indexes
+\du             -- list all roles/users
+\x              -- toggle expanded display (good for wide rows)
+\q              -- quit</code></pre></div>
+      <div class="code-wrap"><div class="code-label">sql — useful inspection queries</div><pre><code class="language-sql">-- All tables with row counts
+SELECT schemaname, tablename, n_live_tup
+FROM pg_stat_user_tables ORDER BY n_live_tup DESC;
+
+-- Table columns
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_name = 'library_pages';
+
+-- Check if extension installed
+SELECT * FROM pg_extension WHERE extname = 'vector';
+
+-- All indexes on a table
+SELECT indexname, indexdef
+FROM pg_indexes WHERE tablename = 'library_pages';</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Creating tables — SQL syntax</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">sql</div><pre><code class="language-sql">-- Basic table
+CREATE TABLE users (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id  TEXT NOT NULL,
+  email      TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Foreign key
+CREATE TABLE documents (
+  id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT
+);
+
+-- pgvector column (requires extension)
+CREATE EXTENSION IF NOT EXISTS vector;
+
+ALTER TABLE library_pages
+  ADD COLUMN embedding_vec vector(384);
+
+-- ivfflat index for fast approximate nearest-neighbour search
+CREATE INDEX ON library_pages
+  USING ivfflat (embedding_vec vector_cosine_ops)
+  WITH (lists = 100);</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Advisory locks — prevent concurrent migration runs</div><div class="card-sub">The fix for the Elestio boot crash</div></div></div>
+    <div class="card-body">
+      <div class="alert danger"><strong>The production bug:</strong> Elestio runs multiple app instances for reliability. On deploy, all instances start simultaneously and all call <code>alembic upgrade head</code> at the same time. Two processes modifying the same DB tables → race condition → app crashes on every deploy.</div>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Before — all instances race</div>
+          <pre><code class="language-python"># docker-entrypoint.sh (simplified)
+# This runs on EVERY instance simultaneously
+subprocess.run(
+    ["alembic", "upgrade", "head"],
+    check=True
+)
+# Instance 1, 2, 3 all run this at once
+# → conflict modifying same tables
+# → app crashes on boot</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ After — serialised with advisory lock</div>
+          <pre><code class="language-python">conn = psycopg2.connect(url)
+conn.autocommit = True
+cur = conn.cursor()
+
+# Instances 2 + 3 BLOCK here until
+# instance 1 releases the lock
+cur.execute("SELECT pg_advisory_lock(42)")
+try:
+    subprocess.run(
+        ["alembic", "upgrade", "head"],
+        check=True
+    )
+finally:
+    cur.execute("SELECT pg_advisory_unlock(42)")
+    conn.close()</code></pre>
+        </div>
+      </div>
+      <ul>
+        <li>The number <code>42</code> is arbitrary — just needs to match across all instances</li>
+        <li>Use a <strong>direct connection</strong> (not the pooler) — pooler doesn't preserve session locks</li>
+        <li><code>finally</code> block ensures the lock is released even if alembic crashes</li>
+        <li>In Scribtive OS this runs in <code>docker-entrypoint.sh</code> before the app starts</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="sql-migrations" class="group-title">Alembic — migrations</div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Alembic commands</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash</div><pre><code class="language-bash">alembic upgrade head            # apply all pending migrations
+alembic upgrade +1              # apply only the next one
+alembic downgrade -1            # undo the last migration
+alembic current                 # current database version
+alembic history                 # all migrations and their status
+alembic revision -m "add model column to usage_events"  # create new file</code></pre></div>
+      <div class="code-wrap"><div class="code-label">python — migration file</div><pre><code class="language-python">"""add model column to usage_events"""
+revision = "0031"
+down_revision = "0030"
+
+from alembic import op
+import sqlalchemy as sa
+
+def upgrade():
+    op.add_column("usage_events",
+        sa.Column("model", sa.String(), nullable=True))
+    op.add_column("usage_events",
+        sa.Column("cache_read", sa.Integer(), server_default="0"))
+
+def downgrade():
+    op.drop_column("usage_events", "model")
+    op.drop_column("usage_events", "cache_read")</code></pre></div>
+      <div class="alert info"><strong>Always write downgrade()</strong> If a migration fails in prod, you need to roll back.</div>
+    </div>
+  </div>
+
+  <div id="sql-sqlalchemy" class="group-title">SQLAlchemy — parameterized queries</div>
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Safe queries — always use parameters, never f-strings for user data</div></div></div>
+    <div class="card-body">
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ SQL injection risk</div>
+          <pre><code class="language-python">rows = session.execute(text(
+    f"SELECT * FROM docs WHERE shelf = '{shelf}'"
+    # shelf = "x'; DROP TABLE docs; --"
+))</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Safe — parameterized</div>
+          <pre><code class="language-python">rows = session.execute(
+    text("SELECT * FROM docs WHERE shelf = :shelf"),
+    {"shelf": shelf}   # shell content never touches SQL
+)</code></pre>
+        </div>
+      </div>
+      <div class="code-wrap"><div class="code-label">python — the full pattern from library_search.py</div><pre><code class="language-python">from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+def search_shelf(session: Session, shelf: str, query: str, k: int = 5) -> list[dict]:
+    # Vector as a string literal is OK — it's computed from embed_texts, not user input
+    qv = embed_texts([query])[0]
+    vec_str = "[" + ",".join(str(x) for x in qv) + "]"
+
+    rows = session.execute(
+        text("""
+            SELECT lp.doc_id, ld.title, lp.page, lp.text,
+                   1 - (lp.embedding_vec <=> :vec::vector) AS vec_sim
+            FROM library_pages lp JOIN library_docs ld ON ld.id = lp.doc_id
+            WHERE ld.shelf = :shelf AND ld.status = 'ready'
+            ORDER BY lp.embedding_vec <=> :vec::vector
+            LIMIT :limit
+        """),
+        {"shelf": shelf, "vec": vec_str, "limit": k * 4}
+    ).fetchall()
+
+    # Access columns by name: r.title, r.page, r.text, r.vec_sim
+    return [{"title": r.title, "score": float(r.vec_sim)} for r in rows]</code></pre></div>
+      <div class="alert tip"><strong>Session lifetime rule</strong> Open a short session per DB read. Never hold one session open across a long-running generator (like an SSE stream) — it ties up a database connection for the entire stream lifetime, which starves other requests. Open, read, close, sleep, repeat.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ PYTHON ════════════════════════ -->
+<div class="section" id="section-python">
+  <div class="section-header">
+    <div class="section-title">Python — Function formats</div>
+    <div class="section-intro">The same "fetch and stream data" function written 6 ways. Plus asyncio threading rules and keyword-only arguments.</div>
+  </div>
+
+  <p style="font-size:14px;color:var(--text2);margin-bottom:24px;max-width:65ch">The base example: a function that polls a database in a loop and yields new rows as they appear. In this project it's <code>_stream_events</code> in <code>stream.py</code>.</p>
+
+  <div id="py-sync" class="group-title">Sync vs Async</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">1. Regular function (def)</div><div class="card-sub">Returns once. Blocks thread while running.</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python</div><pre><code class="language-python">def fetch_rows(deliverable_id: str) -> list[dict]:
+    with db_session() as s:
+        return s.execute("SELECT * FROM steps WHERE id = :id",
+                         {"id": deliverable_id}).fetchall()
+
+# Call:
+result = fetch_rows("abc-123")  # blocks until done</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">2. Async function (async def)</div><div class="card-sub">Returns once. Releases thread while waiting for I/O.</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python</div><pre><code class="language-python">async def fetch_rows(deliverable_id: str) -> list[dict]:
+    async with db_session() as s:
+        result = await s.execute("SELECT * FROM steps WHERE id = :id",
+                                 {"id": deliverable_id})
+    return result.fetchall()
+
+# Inside another async function:
+result = await fetch_rows("abc-123")
+
+# From sync code (test or script):
+import asyncio
+result = asyncio.run(fetch_rows("abc-123"))</code></pre></div>
+      <div class="alert info"><strong>Rule</strong> <code>async def</code> must be called with <code>await</code>. Without it you get a coroutine object, not a result — and it silently does nothing.</div>
+    </div>
+  </div>
+
+  <div id="py-generators" class="group-title">Generators</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">3. Sync generator (def + yield)</div><div class="card-sub">Produces values lazily one at a time. Blocks thread while sleeping.</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python</div><pre><code class="language-python">import time
+from collections.abc import Iterator
+
+def stream_rows(deliverable_id: str) -> Iterator[dict]:
+    cursor = 0
+    while True:
+        with db_session() as s:
+            rows = s.execute("SELECT * FROM steps WHERE idx > :c",
+                             {"c": cursor}).fetchall()
+        for row in rows:
+            yield row
+            cursor += 1
+        time.sleep(0.4)   # blocks thread entirely while sleeping
+
+# Consume:
+for row in stream_rows("abc"):
+    print(row)
+
+# Collect all:
+all_rows = list(stream_rows("abc"))</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">4. Async generator (async def + yield)</div><div class="card-sub">Yields lazily AND releases thread while waiting. What stream.py uses.</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label good">python — the production pattern</div><pre><code class="language-python">import asyncio
+from collections.abc import AsyncIterator
+
+async def stream_rows(deliverable_id: str) -> AsyncIterator[dict]:
+    cursor = 0
+    while True:
+        with db_session() as s:    # short-lived session per tick
+            rows = s.execute("SELECT * FROM steps WHERE idx > :c",
+                             {"c": cursor}).fetchall()
+        for row in rows:
+            yield row
+            cursor += 1
+        await asyncio.sleep(0.4)   # releases thread while waiting
+
+# Consume — MUST use async for:
+async def handler():
+    async for row in stream_rows("abc"):
+        print(row)</code></pre></div>
+      <div class="alert danger"><strong>Never on an async generator:</strong> <code>list(stream_rows())</code> → TypeError. <code>yield from stream_rows()</code> in a sync function → TypeError. Both silently look like they should work but don't.</div>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Breaks</div>
+          <pre><code class="language-python">rows = list(stream_rows("abc"))
+# TypeError: async_generator
+# not iterable
+
+def wrapper():
+    yield from stream_rows("abc")
+# TypeError too</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Works</div>
+          <pre><code class="language-python">async def wrapper():
+    async for row in stream_rows("abc"):
+        yield row
+
+# Or collect from sync (tests):
+def _acollect(deliverable_id):
+    async def _inner():
+        return [r async for r in
+                stream_rows(deliverable_id)]
+    return asyncio.run(_inner())</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">5. Keyword-only arguments with defaults (* separator)</div><div class="card-sub">Pattern from usage.capture() — extending a function without breaking callers</div></div></div>
+    <div class="card-body">
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">Before — 2 fields</div>
+          <pre><code class="language-python">def capture(input_tokens,
+            output_tokens):
+    bucket.append({
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+    })</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">After — 5 fields, old callers still work</div>
+          <pre><code class="language-python">def capture(input_tokens,
+            output_tokens, *,
+            cache_read=0,
+            cache_creation=0,
+            model=""):
+    bucket.append({
+        "input_tokens":   input_tokens,
+        "output_tokens":  output_tokens,
+        "cache_read":     cache_read,
+        "cache_creation": cache_creation,
+        "model":          model,
+    })</code></pre>
+        </div>
+      </div>
+      <p>The <code>*</code> makes everything after it keyword-only. Old callers <code>capture(42, 17)</code> still work. New callers can use <code>capture(42, 17, model="claude-haiku-3")</code>.</p>
+      <div class="alert warn"><strong>Test breakage when extending a dict</strong> Adding fields to a stored dict breaks any test that does exact equality: <code>assert result == {"input_tokens": 42, "output_tokens": 17}</code>. Two options:</div>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label">Option A — update every assertion (explicit)</div>
+          <pre><code class="language-python">assert result == {
+    "input_tokens":   42,
+    "output_tokens":  17,
+    "cache_read":     0,
+    "cache_creation": 0,
+    "model":          "",
+}
+# Tedious but every field is visible</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label">Option B — subset check (future-proof)</div>
+          <pre><code class="language-python">expected = {
+    "input_tokens": 42,
+    "output_tokens": 17,
+}
+# Only checks the keys you care about
+# — new fields don't break this test
+assert expected.items() <= result.items()</code></pre>
+        </div>
+      </div>
+      <p><strong>Which to use:</strong> Option A when the test is specifically about what a dict <em>contains</em> (e.g. a schema test). Option B when the dict is an output and you only care about certain fields.</p>
+    </div>
+  </div>
+
+  <div id="py-asyncio" class="group-title">asyncio thread safety</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Cross-thread queue writes — call_soon_threadsafe</div><div class="card-sub">When background worker threads need to put data onto the main event loop's queue</div></div></div>
+    <div class="card-body">
+      <p><code>asyncio.Queue</code> is NOT thread-safe. If you put items onto it from a different thread than the one running its event loop, you'll get race conditions or crashes.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Wrong — called from worker thread</div>
+          <pre><code class="language-python">def on_step(step):
+    queue.put_nowait(step)
+    # WRONG if on_step runs on a
+    # different thread than the queue</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Correct — bounced to main loop</div>
+          <pre><code class="language-python">def on_step(step):
+    main_loop.call_soon_threadsafe(
+        queue.put_nowait, step
+    )
+    # schedules the put on the right
+    # event loop, thread-safely</code></pre>
+        </div>
+      </div>
+      <p><strong>When this comes up:</strong> When you run an async task on a dedicated worker thread (e.g. to get subprocess spawning capability) but need to feed results back to the main request's event loop. The worker thread calls <code>call_soon_threadsafe</code> to safely hand data back.</p>
+    </div>
+  </div>
+
+  <div id="py-driverhandle" class="card">
+    <div class="card-header"><div><div class="card-title">Windows asyncio: ProactorEventLoop vs SelectorEventLoop</div><div class="card-sub">Why subprocess spawning fails on Windows with uvicorn --reload, and the DriverHandle fix</div></div></div>
+    <div class="card-body">
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Before — fails silently on Windows</div>
+          <pre><code class="language-python"># Called inside a uvicorn request handler
+# uvicorn --reload creates SelectorEventLoop
+# which CANNOT spawn subprocesses on Windows
+process = await asyncio.create_subprocess_exec(
+    "claude", "--model", "claude-3-5-sonnet"
+)
+# → NotImplementedError: Subprocess creation
+#   is not supported with SelectorEventLoop
+# OR silently fails + aclose() errors in logs</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ After — DriverHandle runs on its own ProactorEventLoop</div>
+          <pre><code class="language-python"># Move the work to a worker thread that
+# creates its own ProactorEventLoop
+handle = DriverHandle(
+    coro_factory=lambda: run_agent(prompt)
+)
+# Worker thread's ProactorEventLoop can
+# spawn subprocesses fine on Windows
+result = await handle.result()</code></pre>
+        </div>
+      </div>
+      <p>Windows has two asyncio event loop implementations — which one you get depends on how the loop was created:</p>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Loop type</th><th>Can spawn subprocesses?</th><th>When used</th></tr></thead>
+        <tbody>
+          <tr><td><code>ProactorEventLoop</code></td><td><span class="badge badge-green">Yes</span></td><td>Default when you call <code>asyncio.run()</code> or <code>asyncio.new_event_loop()</code> on Windows</td></tr>
+          <tr><td><code>SelectorEventLoop</code></td><td><span class="badge badge-red">No</span></td><td>What <code>uvicorn --reload</code> creates on Windows (the reloader manages its own loop)</td></tr>
+        </tbody>
+      </table></div>
+      <p>This is why chat streaming fails on Windows with hot-reload enabled: the ASGI app runs on a <code>SelectorEventLoop</code> which cannot spawn subprocesses (like the Claude CLI). The fix is <strong>DriverHandle</strong>: move the subprocess work onto a dedicated worker thread that creates its own <code>ProactorEventLoop</code>.</p>
+      <div class="alert warn"><strong>Symptom</strong> <code>NotImplementedError: Subprocess creation is not supported</code> or the chat turn silently fails and logs show <code>aclose()</code> errors.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">DriverHandle — worker thread with its own event loop</div><div class="card-sub">The pattern in app/thread_bridge.py: ProactorEventLoop + contextvars + concurrent.futures</div></div></div>
+    <div class="card-body">
+      <p>When the main ASGI event loop can't spawn subprocesses (<code>SelectorEventLoop</code>), you move the work to a dedicated thread that creates a fresh <code>ProactorEventLoop</code>. Two bridges are needed: <code>threading.Event</code> to signal readiness, and <code>concurrent.futures.Future</code> to return the result back to the main loop.</p>
+      <div class="code-wrap"><div class="code-label">python — DriverHandle (app/thread_bridge.py)</div><pre><code class="language-python">import asyncio, threading, concurrent.futures, contextvars
+
+class DriverHandle:
+    def __init__(self, coro_factory):
+        self._loop = asyncio.new_event_loop()        # ProactorEventLoop on Windows
+        self._result_future = concurrent.futures.Future()
+        self._task = None
+        ready = threading.Event()
+        ctx = contextvars.copy_context()  # ← copies billing_mode and all other request ctx
+
+        def _run():
+            asyncio.set_event_loop(self._loop)
+            async def _runner():
+                self._task = asyncio.current_task()
+                ready.set()                          # signal: task is alive
+                return await coro_factory()
+            try:
+                result = ctx.run(self._loop.run_until_complete, _runner())
+            except BaseException as e:
+                self._result_future.set_exception(e)
+            else:
+                self._result_future.set_result(result)
+            finally:
+                self._loop.close()
+
+        self._thread = threading.Thread(target=_run, daemon=True)
+        self._thread.start()
+        ready.wait()                                 # block until task is running
+
+    def cancel(self):
+        self._loop.call_soon_threadsafe(self._task.cancel)
+
+    async def result(self):
+        return await asyncio.wrap_future(self._result_future)</code></pre></div>
+      <p><strong>Why <code>contextvars.copy_context()</code>?</strong> Python context variables (like <code>billing_mode</code> set by request middleware) are scoped to the current task/thread. New threads start with an empty context. Without <code>ctx.run(...)</code>, the billing guard on the worker thread would fire incorrectly — blocking every LLM call with "out-of-request metered spend".</p>
+      <p><strong>Why <code>concurrent.futures.Future</code> not <code>asyncio.Future</code>?</strong> An asyncio.Future is bound to a specific event loop. <code>concurrent.futures.Future</code> is loop-agnostic — the worker sets the result; the main loop awaits it via <code>asyncio.wrap_future()</code>.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Silent failure debugging — traceback.format_exc()</div><div class="card-sub">When errors disappear and nothing appears in logs</div></div></div>
+    <div class="card-body">
+      <p>Broad <code>except</code> blocks without logging swallow errors silently. The symptom: the feature doesn't work, no traceback, nothing in the logs.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Error disappears</div>
+          <pre><code class="language-python">try:
+    result = await do_thing()
+except Exception:
+    pass   # gone. good luck.</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Log the full traceback</div>
+          <pre><code class="language-python">import traceback, logging
+logger = logging.getLogger(__name__)
+
+try:
+    result = await do_thing()
+except Exception:
+    logger.error("do_thing failed:\n%s",
+                 traceback.format_exc())</code></pre>
+        </div>
+      </div>
+      <div class="alert info"><strong>Rule</strong> If you write <code>except Exception: pass</code> as a deliberate fallback (like the pgvector → lexical fallback), log the exception first so you know what triggered the fallback during debugging.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Summary table</div></div></div>
+    <div class="card-body">
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Format</th><th>def type</th><th>How to call</th><th>How to collect</th></tr></thead>
+        <tbody>
+          <tr><td>Regular function</td><td><code>def</code></td><td><code>result = fn()</code></td><td>—</td></tr>
+          <tr><td>Async function</td><td><code>async def</code></td><td><code>result = await fn()</code></td><td><code>asyncio.run(fn())</code> from sync</td></tr>
+          <tr><td>Sync generator</td><td><code>def</code> + <code>yield</code></td><td><code>for x in fn():</code></td><td><code>list(fn())</code></td></tr>
+          <tr><td>Async generator</td><td><code>async def</code> + <code>yield</code></td><td><code>async for x in fn():</code></td><td><code>asyncio.run([x async for x in fn()])</code></td></tr>
+          <tr><td>Sync wrapper for async gen</td><td><code>def</code> → <code>asyncio.run</code></td><td><code>result = wrapper()</code></td><td>returns a list</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ TYPESCRIPT ════════════════════════ -->
+<div class="section" id="section-typescript">
+  <div class="section-header">
+    <div class="section-title">TypeScript</div>
+    <div class="section-intro">Type-only imports, interfaces, and the specific patterns that came up in this project — particularly the TS1484 error.</div>
+  </div>
+
+  <div class="group-title">Imports</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Type-only imports — the <code>type</code> keyword (TS1484)</div><div class="card-sub">Error: "ReactNode is a type and must be imported using a type-only import"</div></div></div>
+    <div class="card-body">
+      <p>TypeScript 5+ enforces that types (interfaces, type aliases, imported types) must be imported with the <code>type</code> keyword when <code>verbatimModuleSyntax</code> or <code>isolatedModules</code> is enabled. React projects usually have this.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ TS1484 error</div>
+          <pre><code class="language-typescript">import { Component, ReactNode }
+  from "react";
+// Error: ReactNode is a type —
+// use type-only import</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Correct</div>
+          <pre><code class="language-typescript">import { Component, type ReactNode }
+  from "react";
+// 'type' keyword tells bundler this
+// import can be erased at runtime</code></pre>
+        </div>
+      </div>
+      <p><strong>Rule:</strong> If you import something and only use it as a type annotation (not as a value at runtime), add <code>type</code>. Values (like <code>Component</code> which is a class you extend) don't need it.</p>
+      <div class="code-wrap"><div class="code-label">typescript — examples</div><pre><code class="language-typescript">// Type-only (annotation only — not used as a value at runtime):
+import { type ReactNode, type FC, type RefObject } from "react"
+import type { User } from "../types"   // whole-import type syntax
+
+// Value (used at runtime — don't add type):
+import { Component, useState, useEffect, useRef } from "react"
+import { supabase } from "../lib/supabase"</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Interfaces — Props and State</div><div class="card-sub">The pattern used for every component in this project</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">typescript</div><pre><code class="language-typescript">// Define shapes at the top of the file
+interface Props {
+  id: string
+  onSelect?: (item: Item) => void    // ? = optional
+  children: ReactNode
+}
+
+interface State {
+  data: Item[] | null
+  loading: boolean
+  error: Error | null                // null = no error
+}
+
+// Use them on the class or function
+class MyComponent extends React.Component&lt;Props, State&gt; {
+  state: State = { data: null, loading: true, error: null }
+}
+
+// Or on a function:
+function MyPanel({ id, onSelect, children }: Props) { ... }</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Common TypeScript patterns</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">typescript</div><pre><code class="language-typescript">// Optional chaining — don't crash if data is null
+const title = data?.items?.[0]?.title      // undefined if any part is null
+
+// Nullish coalescing — default if null/undefined
+const name = user?.name ?? "Anonymous"
+
+// Type assertions — tell TS what type something is
+const el = document.getElementById("root") as HTMLDivElement
+
+// Union types — one of several types
+type Status = "loading" | "success" | "error"
+let status: Status = "loading"
+
+// Generic functions
+function first&lt;T&gt;(arr: T[]): T | undefined {
+  return arr[0]
+}
+
+// Record — object with string keys
+const headers: Record&lt;string, string&gt; = {}
+headers["X-Tenant-Id"] = tenantId
+
+// keyof — keys of an object type
+type UserKeys = keyof User   // "id" | "name" | "email"</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Async functions in TypeScript</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">typescript</div><pre><code class="language-typescript">// Return type of an async function is always Promise<T>
+async function fetchUser(id: string): Promise&lt;User&gt; {
+  const res = await fetch(`/api/users/${id}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json() as Promise&lt;User&gt;
+}
+
+// In a React component — always handle the error:
+useEffect(() =&gt; {
+  fetchUser(id)
+    .then(setUser)
+    .catch(e =&gt; setError(e.message))
+}, [id])
+
+// Or with async IIFE inside useEffect:
+useEffect(() =&gt; {
+  ;(async () =&gt; {
+    try {
+      const user = await fetchUser(id)
+      setUser(user)
+    } catch (e) {
+      setError(String(e))
+    }
+  })()
+}, [id])</code></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ REACT ════════════════════════ -->
+<div class="section" id="section-react">
+  <div class="section-header">
+    <div class="section-title">React — Component patterns</div>
+    <div class="section-intro">The same component written 5 ways. Understand which pattern to use when.</div>
+  </div>
+
+  <div id="react-class" class="group-title">Class components</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">1. Class component</div><div class="card-sub">Required for Error Boundaries. Use function components everywhere else.</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">tsx</div><pre><code class="language-typescript">import { Component, type ReactNode } from "react"
+
+interface Props { id: string }
+interface State { data: any; loading: boolean; error: string | null }
+
+class DataPanel extends Component&lt;Props, State&gt; {
+  state: State = { data: null, loading: true, error: null }
+
+  componentDidMount() { this.fetchData(this.props.id) }
+
+  componentDidUpdate(prev: Props) {
+    if (prev.id !== this.props.id) this.fetchData(this.props.id)
+  }
+
+  async fetchData(id: string) {
+    this.setState({ loading: true, error: null })
+    try {
+      const data = await fetch(`/api/data/${id}`).then(r => r.json())
+      this.setState({ data, loading: false })
+    } catch (e) {
+      this.setState({ error: String(e), loading: false })
+    }
+  }
+
+  render() {
+    const { data, loading, error } = this.state
+    if (loading) return &lt;div&gt;Loading...&lt;/div&gt;
+    if (error)   return &lt;div&gt;Error: {error}&lt;/div&gt;
+    return &lt;div&gt;{JSON.stringify(data)}&lt;/div&gt;
+  }
+}</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Error Boundary — exact code from this project</div><div class="card-sub">frontend/src/components/ErrorBoundary.tsx</div></div></div>
+    <div class="card-body">
+      <p>Error Boundaries are the only thing that requires a class component. They catch render errors in their subtree and show a fallback instead of a blank screen.</p>
+      <div class="code-wrap"><div class="code-label good">tsx — the real file</div><pre><code class="language-typescript">import { Component, type ReactNode } from "react"
+
+interface Props { children: ReactNode; name?: string }
+interface State { hasError: boolean; error: Error | null }
+
+export class ErrorBoundary extends Component&lt;Props, State&gt; {
+  state: State = { hasError: false, error: null }
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error }
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error(`[ErrorBoundary: ${this.props.name}]`, error, info)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        &lt;div&gt;
+          &lt;p&gt;Something went wrong.&lt;/p&gt;
+          &lt;p&gt;{this.state.error?.message}&lt;/p&gt;
+          &lt;button onClick={() =&gt; this.setState({ hasError: false, error: null })}&gt;
+            Retry
+          &lt;/button&gt;
+        &lt;/div&gt;
+      )
+    }
+    return this.props.children
+  }
+}
+
+// Usage in App.tsx:
+// &lt;ErrorBoundary name="Interview Panel"&gt;
+//   &lt;InterviewCard /&gt;
+// &lt;/ErrorBoundary&gt;</code></pre></div>
+      <div class="alert tip"><strong>Why it matters</strong> Without this, one null-reference bug in one panel unmounts the entire React tree → blank screen. With it, only that panel shows an error while everything else keeps working.</div>
+    </div>
+  </div>
+
+  <div id="react-hooks" class="group-title">Function components with hooks</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">2. Function + useState + useEffect</div><div class="card-sub">The modern default. Same behaviour as the class above.</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">tsx</div><pre><code class="language-typescript">import { useState, useEffect } from "react"
+
+function DataPanel({ id }: { id: string }) {
+  const [data, setData]       = useState&lt;any&gt;(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState&lt;string | null&gt;(null)
+
+  useEffect(() =&gt; {
+    let cancelled = false           // prevents stale state if id changes quickly
+    setLoading(true); setError(null)
+
+    fetch(`/api/data/${id}`)
+      .then(r =&gt; r.json())
+      .then(d =&gt; { if (!cancelled) { setData(d); setLoading(false) } })
+      .catch(e =&gt; { if (!cancelled) { setError(String(e)); setLoading(false) } })
+
+    return () =&gt; { cancelled = true }   // cleanup on unmount or id change
+  }, [id])
+
+  if (loading) return &lt;div&gt;Loading...&lt;/div&gt;
+  if (error)   return &lt;div&gt;Error: {error}&lt;/div&gt;
+  return &lt;div&gt;{JSON.stringify(data)}&lt;/div&gt;
+}</code></pre></div>
+      <table>
+        <thead><tr><th>Hook</th><th>What it does</th><th>Class equivalent</th></tr></thead>
+        <tbody>
+          <tr><td><code>useState(x)</code></td><td>Stores value; re-renders when it changes</td><td><code>this.state</code> + <code>setState</code></td></tr>
+          <tr><td><code>useEffect(fn, [deps])</code></td><td>Runs fn after render; re-runs when deps change</td><td><code>componentDidMount</code> + <code>componentDidUpdate</code></td></tr>
+          <tr><td><code>useEffect(fn, [])</code></td><td>Runs only on first mount</td><td><code>componentDidMount</code></td></tr>
+          <tr><td>return cleanup from useEffect</td><td>Runs on unmount or before re-run</td><td><code>componentWillUnmount</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">3. Custom hook — extract and reuse logic</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">tsx</div><pre><code class="language-typescript">// hooks/useData.ts
+export function useData(id: string) {
+  const [data, setData]       = useState&lt;any&gt;(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() =&gt; {
+    let cancelled = false
+    fetch(`/api/data/${id}`).then(r =&gt; r.json())
+      .then(d =&gt; { if (!cancelled) { setData(d); setLoading(false) } })
+    return () =&gt; { cancelled = true }
+  }, [id])
+
+  return { data, loading }
+}
+
+// DataPanel.tsx — component stays tiny
+function DataPanel({ id }: { id: string }) {
+  const { data, loading } = useData(id)   // reuse anywhere
+  return loading ? &lt;div&gt;Loading...&lt;/div&gt; : &lt;div&gt;{JSON.stringify(data)}&lt;/div&gt;
+}</code></pre></div>
+      <p>Custom hooks are just functions starting with <code>use</code> that call other hooks. They share stateful logic without changing component structure.</p>
+    </div>
+  </div>
+
+  <div id="react-patterns" class="group-title">Patterns</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">4. Callback props</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">tsx</div><pre><code class="language-typescript">// Parent decides what happens; child just calls the callback
+function App() {
+  const [selected, setSelected] = useState&lt;string | null&gt;(null)
+  return &lt;DataPanel id="doc-123" onSelect={item =&gt; setSelected(item.id)} /&gt;
+}
+
+interface Props {
+  id: string
+  onSelect: (item: { id: string }) =&gt; void   // function type
+}
+
+function DataPanel({ id, onSelect }: Props) {
+  const { data } = useData(id)
+  return (
+    &lt;ul&gt;
+      {data?.map((item: any) =&gt; (
+        &lt;li key={item.id} onClick={() =&gt; onSelect(item)}&gt;{item.label}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  )
+}</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">5. Context — share state without prop-drilling</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">tsx</div><pre><code class="language-typescript">import { createContext, useContext, useState } from "react"
+
+const TenantContext = createContext&lt;{ tenantId: string }&gt;({ tenantId: "" })
+
+// Provider wraps the tree
+function App() {
+  const [tenantId] = useState("tenant-xyz")
+  return (
+    &lt;TenantContext.Provider value={{ tenantId }}&gt;
+      &lt;DataPanel id="doc-123" /&gt;   {/* doesn't need tenantId as a prop */}
+    &lt;/TenantContext.Provider&gt;
+  )
+}
+
+// Any descendant reads it
+function DataPanel({ id }: { id: string }) {
+  const { tenantId } = useContext(TenantContext)
+  // use tenantId in fetch...
+}</code></pre></div>
+      <p><strong>Use for:</strong> auth state, tenant ID, theme — values needed in many places. <strong>Avoid for:</strong> state that changes frequently (causes many re-renders).</p>
+    </div>
+  </div>
+
+  <div id="react-perf" class="group-title">Performance hooks</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">useCallback — memoize event handler functions</div><div class="card-sub">Use on EVERY function you pass as a prop to a child component</div></div></div>
+    <div class="card-body">
+      <p>Every time a parent renders, functions defined inside it are recreated as new objects. A child component receiving that function sees a new prop even if nothing changed, causing it to re-render unnecessarily. <code>useCallback</code> returns the SAME function object across renders (unless the deps change).</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ New function on every render</div>
+          <pre><code class="language-typescript">function Parent({ projectId }) {
+  // New function object each render
+  // → ItemCard re-renders every time
+  // Parent re-renders, even if
+  // projectId didn't change
+  const handleSelect = (item) =&gt; {
+    console.log("selected", item.id)
+    fetchDetails(item.id, projectId)
+  }
+
+  return &lt;ItemCard onSelect={handleSelect} /&gt;
+}</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Stable reference with useCallback</div>
+          <pre><code class="language-typescript">function Parent({ projectId }) {
+  // Same function object until
+  // projectId changes
+  const handleSelect = useCallback(
+    (item) =&gt; {
+      console.log("selected", item.id)
+      fetchDetails(item.id, projectId)
+    },
+    [projectId]   // dep array: remake
+                  // only when this changes
+  )
+
+  return &lt;ItemCard onSelect={handleSelect} /&gt;
+}</code></pre>
+        </div>
+      </div>
+      <div class="alert tip"><strong>Rule of thumb</strong> Wrap in <code>useCallback</code> every function that: (1) is passed as a prop, (2) is listed as a dependency of another hook's <code>[]</code>, or (3) triggers a fetch. Don't wrap functions that are only used inside the same component.</div>
+      <div class="code-wrap"><div class="code-label">tsx — real example: every action in a card component</div><pre><code class="language-typescript">function DeliverableCard({ id, onDelete, onRename }) {
+  const handleDelete = useCallback(() =&gt; {
+    if (!confirm("Delete this?")) return
+    fetch(`/api/deliverables/${id}`, { method: "DELETE" })
+      .then(() =&gt; onDelete(id))
+  }, [id, onDelete])             // depends on id and the callback from parent
+
+  const handleRename = useCallback((newName: string) =&gt; {
+    fetch(`/api/deliverables/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ name: newName })
+    }).then(() =&gt; onRename(id, newName))
+  }, [id, onRename])
+
+  const handleDuplicate = useCallback(() =&gt; {
+    fetch(`/api/deliverables/${id}/duplicate`, { method: "POST" })
+  }, [id])
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={handleDelete}&gt;Delete&lt;/button&gt;
+      &lt;button onClick={handleDuplicate}&gt;Duplicate&lt;/button&gt;
+      &lt;RenameInput onSave={handleRename} /&gt;   {/* stable ref → RenameInput won't re-render */}
+    &lt;/div&gt;
+  )
+}</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">useMemo — memoize expensive computed values</div><div class="card-sub">For calculations, filtered lists, sorted arrays — not for functions (use useCallback for those)</div></div></div>
+    <div class="card-body">
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Re-sorts on every render</div>
+          <pre><code class="language-typescript">function ProjectList({ projects, filter }) {
+  // Runs on every render
+  const sorted = projects
+    .filter(p =&gt; p.status === filter)
+    .sort((a, b) =&gt;
+      b.updatedAt.localeCompare(a.updatedAt)
+    )
+
+  return sorted.map(p =&gt; &lt;ProjectCard key={p.id} {...p} /&gt;)
+}</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Only re-computes when inputs change</div>
+          <pre><code class="language-typescript">function ProjectList({ projects, filter }) {
+  const sorted = useMemo(
+    () =&gt; projects
+      .filter(p =&gt; p.status === filter)
+      .sort((a, b) =&gt;
+        b.updatedAt.localeCompare(a.updatedAt)
+      ),
+    [projects, filter]   // only recompute when
+  )                      // these change
+
+  return sorted.map(p =&gt; &lt;ProjectCard key={p.id} {...p} /&gt;)
+}</code></pre>
+        </div>
+      </div>
+      <p><strong>When to use:</strong> list filtering/sorting with many items, derived data from props, anything with a noticeable computation cost. Don't use for simple property access or tiny arrays — the memoization itself has a cost.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">useRef — persistent mutable value that doesn't trigger re-renders</div></div></div>
+    <div class="card-body">
+      <p>A ref is a box: <code>ref.current</code> is the value inside. Changing <code>ref.current</code> does NOT cause a re-render. Use for: DOM element access, storing a timer ID, tracking a previous value, a flag that doesn't need to be displayed.</p>
+      <div class="code-wrap"><div class="code-label">tsx — 3 common use cases</div><pre><code class="language-typescript">import { useRef, useEffect } from "react"
+
+// 1. DOM element access — focus an input on mount
+function SearchBox() {
+  const inputRef = useRef&lt;HTMLInputElement&gt;(null)
+  useEffect(() =&gt; { inputRef.current?.focus() }, [])
+  return &lt;input ref={inputRef} placeholder="Search..." /&gt;
+}
+
+// 2. Store a timer ID so you can cancel it later
+function AutoSave({ content }) {
+  const timerRef = useRef&lt;ReturnType&lt;typeof setTimeout&gt;&gt;(null)
+
+  useEffect(() =&gt; {
+    clearTimeout(timerRef.current!)
+    timerRef.current = setTimeout(() =&gt; {
+      saveToServer(content)
+    }, 1000)   // save 1 second after last change
+    return () =&gt; clearTimeout(timerRef.current!)
+  }, [content])
+
+  return &lt;div&gt;{content}&lt;/div&gt;
+}
+
+// 3. Track previous value without triggering re-render
+function DataPanel({ value }) {
+  const prevRef = useRef(value)
+  useEffect(() =&gt; { prevRef.current = value })   // updates after render
+
+  const changed = prevRef.current !== value
+  return &lt;div&gt;{changed ? "changed!" : "same"}&lt;/div&gt;
+}</code></pre></div>
+      <div class="alert warn"><strong>ref vs state</strong> If you need the UI to update when a value changes → use <code>useState</code>. If you just need to remember it for later (timer ID, DOM node, flag) → use <code>useRef</code>.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">useReducer — complex state with multiple actions</div><div class="card-sub">When useState gets messy with many related fields</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">tsx — a form with loading, error, and result state</div><pre><code class="language-typescript">import { useReducer } from "react"
+
+type State = { status: "idle" | "loading" | "success" | "error"; data: any; error: string | null }
+type Action =
+  | { type: "SUBMIT" }
+  | { type: "SUCCESS"; payload: any }
+  | { type: "ERROR"; message: string }
+  | { type: "RESET" }
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SUBMIT":  return { ...state, status: "loading", error: null }
+    case "SUCCESS": return { status: "success", data: action.payload, error: null }
+    case "ERROR":   return { ...state, status: "error", error: action.message }
+    case "RESET":   return { status: "idle", data: null, error: null }
+    default:        return state
+  }
+}
+
+function ProjectForm() {
+  const [state, dispatch] = useReducer(reducer, { status: "idle", data: null, error: null })
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    dispatch({ type: "SUBMIT" })
+    try {
+      const data = await createProject()
+      dispatch({ type: "SUCCESS", payload: data })
+    } catch (e) {
+      dispatch({ type: "ERROR", message: String(e) })
+    }
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      {state.status === "loading" &amp;&amp; &lt;span&gt;Saving...&lt;/span&gt;}
+      {state.status === "error"   &amp;&amp; &lt;span&gt;{state.error}&lt;/span&gt;}
+      &lt;button disabled={state.status === "loading"}&gt;Create&lt;/button&gt;
+    &lt;/form&gt;
+  )
+}</code></pre></div>
+      <p><strong>vs useState:</strong> use <code>useReducer</code> when state transitions have names (submit, success, error, reset) and when multiple fields always change together. Use multiple <code>useState</code> calls when fields are independent.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">React.memo — prevent re-rendering when props haven't changed</div><div class="card-sub">Pair with useCallback — memo only helps if the props are stable</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">tsx</div><pre><code class="language-typescript">import { memo } from "react"
+
+// Without memo: re-renders whenever PARENT re-renders, even if item didn't change
+// With memo: only re-renders when its own props change
+const ItemCard = memo(function ItemCard({ item, onSelect }) {
+  console.log("ItemCard rendered for", item.id)
+  return (
+    &lt;div onClick={() =&gt; onSelect(item)}&gt;
+      {item.title}
+    &lt;/div&gt;
+  )
+})
+
+// This only works if onSelect is stable (useCallback in parent!)
+// If parent passes a new function object every render,
+// memo does nothing — the prop changed.
+function Parent({ items }) {
+  const handleSelect = useCallback((item) =&gt; {
+    setSelected(item.id)
+  }, [])   // stable — no deps that change
+
+  return items.map(item =&gt;
+    &lt;ItemCard key={item.id} item={item} onSelect={handleSelect} /&gt;
+  )
+}</code></pre></div>
+      <p><strong>The chain:</strong> <code>React.memo</code> on the child + <code>useCallback</code> on the parent's handlers + <code>useMemo</code> on computed data = avoid unnecessary re-renders throughout the tree.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Hook dependency array — the most common mistake</div></div></div>
+    <div class="card-body">
+      <p>The dep array tells React "re-run this when these values change." Missing a dependency causes stale closures — the hook runs but sees an old value.</p>
+      <table>
+        <thead><tr><th>Dep array</th><th>When hook re-runs</th><th>Use for</th></tr></thead>
+        <tbody>
+          <tr><td><code>[]</code></td><td>Only once, on mount</td><td>One-time setup: subscriptions, fetching initial data</td></tr>
+          <tr><td><code>[id]</code></td><td>On mount + when <code>id</code> changes</td><td>Re-fetch when the selected item changes</td></tr>
+          <tr><td>No array</td><td>After EVERY render</td><td>Almost never — usually a bug</td></tr>
+        </tbody>
+      </table>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Stale closure — misses the dep</div>
+          <pre><code class="language-typescript">useEffect(() =&gt; {
+  fetch(`/api/data/${id}`)   // id used here
+    .then(setData)
+}, [])   // but not listed here
+// → always fetches for the id
+// that was current on first render</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Correct — dep listed</div>
+          <pre><code class="language-typescript">useEffect(() =&gt; {
+  fetch(`/api/data/${id}`)
+    .then(setData)
+}, [id])   // re-fetches when id changes</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ SETUP ════════════════════════ -->
+<div class="section" id="section-setup">
+  <div class="section-header">
+    <div class="section-title">Windows Dev Setup</div>
+    <div class="section-intro">Everything you need to get the backend running locally on Windows — every specific gotcha that came up.</div>
+  </div>
+
+  <div id="setup-venv" class="group-title">Python virtual environment</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Creating and activating a venv (Windows)</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">powershell</div><pre><code class="language-bash">cd backend
+
+# MUST specify 3.12 — project requires >=3.12
+py -3.12 -m venv .venv          # py launcher lets you pick the version
+
+# Install dependencies
+.venv\Scripts\pip install -e .   # -e = editable mode (install from pyproject.toml)
+
+# Start the backend (uses dev.cmd which activates venv then starts uvicorn)
+.\dev.cmd</code></pre></div>
+      <div class="alert danger"><strong>Wrong Python version</strong> If you created <code>.venv</code> with Python 3.11 but the project requires 3.12, packages will install but the app will fail at import. Fix:<br><code>Remove-Item -Recurse -Force .venv</code> then recreate with <code>py -3.12 -m venv .venv</code>.</div>
+      <div class="alert warn"><strong>What dev.cmd does</strong> <code>call .venv\Scripts\activate.bat</code> then <code>python -m uvicorn app.main:app --port 8010 --reload</code>. Run it as <code>.\dev.cmd</code> (dot-backslash required in PowerShell).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Common setup errors and fixes</div></div></div>
+    <div class="card-body">
+      <table>
+        <thead><tr><th>Error</th><th>Cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>uvicorn: No module named uvicorn</code></td><td>venv exists but deps not installed</td><td><code>.venv\Scripts\pip install -e .</code></td></tr>
+          <tr><td><code>dev.cmd not recognized</code></td><td>PowerShell needs <code>.\</code> prefix</td><td>Use <code>.\dev.cmd</code></td></tr>
+          <tr><td>Python 3.11 in venv, need 3.12</td><td>Wrong py version when creating</td><td>Delete venv, run <code>py -3.12 -m venv .venv</code></td></tr>
+          <tr><td>App starts but API key not found</td><td>pydantic-settings doesn't set os.environ</td><td>See env section below</td></tr>
+          <tr><td>Changes to .env not picked up</td><td>Hot reload doesn't re-read .env</td><td>Kill and restart the backend</td></tr>
+          <tr><td>Docker container missing pgvector</td><td>Used <code>postgres:16</code> not <code>pgvector/pgvector:pg16</code></td><td>Delete container, recreate with correct image</td></tr>
+          <tr><td>No tenants in dropdown</td><td>Local DB is empty</td><td><code>python scripts\seed_dev.py</code></td></tr>
+          <tr><td>Sign in required on project creation</td><td>No tenant selected in Settings</td><td>Open Settings, select tenant from dropdown</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">vim — if you get stuck in the editor</div><div class="card-sub">Happens when git opens vim for commit messages</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">vim</div><pre><code class="language-bash">i                 # enter INSERT mode (to type)
+Escape            # leave INSERT mode (ALWAYS press this first before any command)
+:wq               # save and quit (write + quit)
+:q!               # quit WITHOUT saving (discard all changes)
+:w                # save only (don't quit)
+
+# If you see "-- INSERT --" at the bottom, you're in insert mode.
+# Press Escape first, then any colon command.</code></pre></div>
+      <div class="alert tip"><strong>Avoid vim entirely</strong> Set your git editor to something you know: <code>git config --global core.editor "code --wait"</code> (VS Code) or just use <code>git commit -m "message"</code> directly.</div>
+    </div>
+  </div>
+
+  <div id="setup-env" class="group-title">Environment variables and .env</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">pydantic-settings vs os.environ — the gotcha</div></div></div>
+    <div class="card-body">
+      <p><code>pydantic-settings</code> reads <code>.env</code> and puts values into your Python settings object (<code>settings.anthropic_api_key</code>). But it does NOT set <code>os.environ</code>.</p>
+      <p>Third-party packages like <code>claude-agent-sdk</code> read <code>ANTHROPIC_API_KEY</code> from <code>os.environ</code> directly — they don't know about your pydantic settings object. So even if your settings object has the key, the SDK won't see it.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">Result: SDK doesn't find key</div>
+          <pre><code class="language-python"># .env has ANTHROPIC_API_KEY=sk-ant-...
+# settings.anthropic_api_key = "sk-ant-..."
+
+# But:
+os.environ.get("ANTHROPIC_API_KEY")
+# → None (pydantic didn't set it)</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">Fix: propagate to os.environ</div>
+          <pre><code class="language-python">import os
+from app.config import settings
+
+# After loading settings, propagate:
+if settings.anthropic_api_key:
+    os.environ["ANTHROPIC_API_KEY"] = \
+        settings.anthropic_api_key</code></pre>
+        </div>
+      </div>
+      <div class="alert warn"><strong>.env changes require backend restart</strong> uvicorn's hot reload watches Python files, not .env. Change a .env value → Ctrl+C → restart.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Supabase DATABASE_URL — pooler vs direct</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash — backend/.env</div><pre><code class="language-bash"># App traffic → pooler (port 6543, handles many concurrent connections)
+DATABASE_URL=postgresql://postgres.xxxx:PASSWORD@aws-0-eu-west-2.pooler.supabase.com:6543/postgres
+
+# Migrations only → direct connection (Alembic needs persistent connection)
+MIGRATIONS_DATABASE_URL=postgresql://postgres:PASSWORD@db.xxxx.supabase.co:5432/postgres
+
+# Where to find these in Supabase dashboard:
+# Project Settings → Database → Connection string
+# Toggle "Display connection pooler" for the pooler URL</code></pre></div>
+      <div class="alert info"><strong>Why two URLs?</strong> The pooler handles many connections efficiently but doesn't support session-level features like advisory locks or long transactions. Alembic needs those, so it uses the direct connection. App traffic uses the pooler.</div>
+    </div>
+  </div>
+
+  <div id="setup-localdev" class="card">
+    <div class="card-header"><div><div class="card-title">Required local dev env vars (the non-obvious ones)</div><div class="card-sub">Add these to backend/.env — PowerShell $env: alone is not enough</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash — backend/.env</div><pre><code class="language-bash">ANTHROPIC_API_KEY=sk-ant-api03-...
+SCRIBTIVE_ALLOW_METERED_OUT_OF_REQUEST=1</code></pre></div>
+      <p><strong>Why <code>SCRIBTIVE_ALLOW_METERED_OUT_OF_REQUEST=1</code>?</strong> The app's billing guard runs by checking Python context variables set by request middleware. The streaming chat path runs on a worker thread (DriverHandle) — before the <code>contextvars.copy_context()</code> fix, the worker thread had an empty context, so the guard fired incorrectly on every LLM call. This flag bypasses the guard in local dev.</p>
+      <p><strong>Why must the API key be in .env, not just set in PowerShell?</strong> Setting <code>$env:ANTHROPIC_API_KEY</code> in a PowerShell session only affects that session. pydantic-settings reads <code>.env</code> at process startup — if the key isn't in <code>.env</code>, it won't be picked up, even if your PowerShell session has it.</p>
+      <div class="alert danger"><strong>Never commit .env to git</strong> It contains your real API key. <code>git add -A</code> will include it if it's not in <code>.gitignore</code>.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">docker-compose vs docker run — which to use when</div></div></div>
+    <div class="card-body">
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Command</th><th>What it does</th><th>When to use</th></tr></thead>
+        <tbody>
+          <tr><td><code>docker-compose up</code></td><td>Builds and runs the full <strong>production</strong> app (backend + frontend bundled together), connecting to Supabase. Reads <code>docker-compose.yml</code>.</td><td><strong>Never for local dev.</strong> This is the Elestio production deployment command.</td></tr>
+          <tr><td><code>docker run pgvector/pgvector:pg16</code></td><td>Starts just a PostgreSQL + pgvector database container</td><td>Local dev only — gives you a local DB to develop against without touching Supabase</td></tr>
+        </tbody>
+      </table></div>
+      <div class="alert info"><strong>Local dev rule</strong> Use <code>docker run</code> for the DB only. Run backend and frontend directly: <code>.\dev.cmd</code> and <code>npm run dev</code>. Never <code>docker-compose up</code> locally.</div>
+    </div>
+  </div>
+
+  <div id="setup-ps" class="group-title">PowerShell gotchas</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">PowerShell-specific commands and gotchas</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">powershell — file encoding</div><pre><code class="language-powershell"># Set-Content on Windows PowerShell 5.1 defaults to ANSI — specify UTF-8:
+Set-Content backend\app\file.py -Encoding UTF8
+
+# NOT: -Encoding utf8NoBOM (not supported in PS 5.1, causes error)</code></pre></div>
+      <div class="code-wrap"><div class="code-label">powershell — bulk text replace with regex</div><pre><code class="language-powershell"># Replace all occurrences of a pattern in a file:
+(Get-Content backend\app\llm.py -Raw) `
+  -replace 'system=([A-Z][A-Z_]+),', `
+           'system=[{"type": "text", "text": $1, "cache_control": {"type": "ephemeral"}}],' `
+  | Set-Content backend\app\llm.py -Encoding UTF8
+
+# -Raw reads the whole file as one string (preserves newlines in replacements)
+# $1 is a capture group back-reference (like \1 in bash)</code></pre></div>
+      <div class="code-wrap"><div class="code-label">powershell — common equivalents</div><pre><code class="language-powershell">.\dev.cmd                    # run .cmd file (needs .\)
+py -3.12 -m venv .venv       # create venv with specific Python version
+.venv\Scripts\pip install -e .   # install from pyproject.toml
+Remove-Item -Recurse -Force .venv   # delete the venv folder
+
+# Check Python version in venv:
+.venv\Scripts\python --version</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">PowerShell <code>$env:</code> is session-only — not the same as .env</div></div></div>
+    <div class="card-body">
+      <p><code>$env:KEY = "value"</code> sets an environment variable in that PowerShell session only. It is NOT persistent and does NOT write to <code>.env</code>.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Session-only — gone when shell closes</div>
+          <pre><code class="language-powershell">$env:ANTHROPIC_API_KEY = "sk-ant-..."
+.\dev.cmd   # works NOW but only because
+            # this PS session set it.
+            # New terminal = gone.</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Put it in backend/.env — always works</div>
+          <pre><code class="language-bash"># backend/.env
+ANTHROPIC_API_KEY=sk-ant-api03-...
+# pydantic-settings reads this at startup
+# regardless of your PowerShell session</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ PATTERNS ════════════════════════ -->
+<div class="section" id="section-patterns">
+  <div class="section-header">
+    <div class="section-title">Architecture patterns</div>
+    <div class="section-intro">SSE streaming, FastAPI patterns, hybrid vector search, and security rules — from real code in this project.</div>
+  </div>
+
+  <div id="pat-sse" class="group-title">📡 SSE (Server-Sent Events)</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">SSE wire format</div><div class="card-sub">What the server actually sends down the connection</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">text — SSE wire format</div><pre><code class="language-bash"># Each event is two or more lines ending with a blank line:
+event: step
+data: {"label": "Searched project for scope - 2 results", "idx": 0}
+
+event: chat
+data: {"role": "user", "text": "What does the scope say?", "idx": 1}
+
+# Heartbeat — a bare comment line (colon prefix). Ignored by parsers.
+# Keeps reverse proxies from killing an idle connection.
+: heartbeat
+
+# End-of-stream event:
+event: idle
+data: {"reason": "turn_complete"}</code></pre></div>
+      <div class="code-wrap"><div class="code-label">python — the _sse helper from stream.py</div><pre><code class="language-python">def _sse(event: str, data: dict) -> str:
+    return f"event: {event}\ndata: {json.dumps(data)}\n\n"
+
+# Usage:
+yield _sse("step", {"label": "Searching...", "idx": 0})
+yield _sse("idle", {"reason": "turn_complete"})
+yield ": heartbeat\n\n"   # comment line — no event/data</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Why fetch() + ReadableStream instead of native EventSource</div></div></div>
+    <div class="card-body">
+      <p>The browser's native <code>EventSource</code> API cannot send custom HTTP headers. This app's API requires <code>Authorization: Bearer &lt;token&gt;</code> and <code>X-Tenant-Id: &lt;uuid&gt;</code> on every request — headers that <code>EventSource</code> cannot set.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ EventSource — no custom headers</div>
+          <pre><code class="language-typescript">const es = new EventSource("/api/stream")
+// Can't set Authorization header
+// → 401 Unauthorized</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ fetch() + manual SSE parse</div>
+          <pre><code class="language-typescript">const res = await fetch("/api/stream", {
+  headers: authHeaders()   // includes token
+})
+const reader = res.body!.getReader()
+// Parse SSE lines manually</code></pre>
+        </div>
+      </div>
+      <div class="alert warn"><strong>Also don't put tokens in query strings</strong> <code>/api/stream?token=abc123</code> — tokens in URLs appear in proxy logs, browser history, and server access logs. Always use headers.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Required SSE response headers</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python — FastAPI StreamingResponse</div><pre><code class="language-python">return StreamingResponse(
+    _stream_events(tenant_id, deliverable_id, since),
+    media_type="text/event-stream",
+    headers={
+        "Cache-Control": "no-cache",     # prevent response caching
+        "X-Accel-Buffering": "no",       # tell nginx NOT to buffer
+    }
+)</code></pre></div>
+      <p><strong>Why <code>X-Accel-Buffering: no</code>:</strong> nginx by default buffers <code>text/event-stream</code> responses, which silently turns streaming into "everything arrives at once" — exactly the problem SSE is supposed to fix. This header tells nginx to pass chunks through immediately.</p>
+    </div>
+  </div>
+
+  <div id="pat-fastapi" class="group-title">🚀 FastAPI patterns</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Dependency injection with Depends()</div><div class="card-sub">Used for authentication on every route in this project</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python</div><pre><code class="language-python">from fastapi import APIRouter, Depends, HTTPException
+
+# The dependency function — runs before the route handler
+def require_tenant(
+    authorization: str | None = Header(default=None),
+    x_tenant_id: str | None = Header(default=None)
+) -> str:
+    # In dev mode, trust X-Tenant-Id header
+    if settings.dev_mode and x_tenant_id:
+        try:
+            uuid.UUID(x_tenant_id)
+        except ValueError:
+            raise HTTPException(401, "X-Tenant-Id must be a UUID")
+        return x_tenant_id
+    # In prod, validate JWT
+    raise HTTPException(401, "sign in required")
+
+# Use in any route — FastAPI runs require_tenant first
+router = APIRouter(prefix="/api/projects/{project_id}")
+
+@router.get("/deliverables")
+def list_deliverables(
+    project_id: str,
+    tenant_id: str = Depends(require_tenant)   # injected
+) -> list[dict]:
+    # tenant_id is already validated here
+    with tenant_session(tenant_id) as s:
+        return ...</code></pre></div>
+      <p><code>Depends()</code> is FastAPI's dependency injection system. The function runs before the route, can raise HTTP exceptions, and its return value is passed to the route as a parameter.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">404-before-streaming rule</div><div class="card-sub">Always validate before opening a long-lived connection</div></div></div>
+    <div class="card-body">
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Opens stream, then discovers 404</div>
+          <pre><code class="language-python">@router.get("/stream")
+def stream(project_id, deliverable_id,
+           tenant_id=Depends(require_tenant)):
+    return StreamingResponse(
+        # 404 check happens inside the
+        # generator — after connection opened
+        _stream_events(...)
+    )</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Validate first, THEN open stream</div>
+          <pre><code class="language-python">@router.get("/stream")
+def stream(project_id, deliverable_id,
+           tenant_id=Depends(require_tenant)):
+    with tenant_session(tenant_id) as s:
+        project_or_404(s, project_id)
+        deliverable_or_404(s, project_id,
+                           deliverable_id)
+    # Only open stream if valid
+    return StreamingResponse(...)</code></pre>
+        </div>
+      </div>
+      <p>A connection that opens then immediately closes is worse than one that never opens — it wastes resources and looks broken to the client.</p>
+    </div>
+  </div>
+
+  <div id="pat-fastapi-adv" class="card">
+    <div class="card-header"><div><div class="card-title">Path parameters, query parameters, and request body</div><div class="card-sub">The three ways data comes into a FastAPI route</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python</div><pre><code class="language-python">from fastapi import APIRouter, Depends, Query, HTTPException
+from pydantic import BaseModel
+
+router = APIRouter(prefix="/api/projects/{project_id}")
+
+# ─── 1. Path parameter: part of the URL ───────────────────────────────────
+@router.get("/deliverables/{deliverable_id}")
+def get_deliverable(
+    project_id: str,            # from {project_id} in prefix
+    deliverable_id: str,        # from {deliverable_id} in route
+    tenant_id: str = Depends(require_tenant)
+) -> dict:
+    with tenant_session(tenant_id) as s:
+        d = deliverable_or_404(s, project_id, deliverable_id)
+    return {"id": d.id, "name": d.name}
+
+# ─── 2. Query parameter: ?key=value in the URL ────────────────────────────
+@router.get("/deliverables")
+def list_deliverables(
+    project_id: str,
+    status: str | None = Query(default=None),      # ?status=ready
+    limit: int = Query(default=20, le=100),        # ?limit=10 (max 100)
+    tenant_id: str = Depends(require_tenant)
+) -> list[dict]:
+    with tenant_session(tenant_id) as s:
+        rows = s.execute(text(
+            "SELECT * FROM deliverables WHERE project_id = :pid"
+            + (" AND status = :status" if status else "")
+        ), {"pid": project_id, **({"status": status} if status else {})}).fetchall()
+    return [{"id": r.id, "name": r.name} for r in rows]
+
+# ─── 3. Request body: JSON payload in POST/PUT ────────────────────────────
+class CreateDeliverableRequest(BaseModel):
+    name: str
+    deliverable_type: str
+    brief: str | None = None       # optional field with default
+
+@router.post("/deliverables")
+def create_deliverable(
+    project_id: str,
+    body: CreateDeliverableRequest,       # FastAPI reads JSON body automatically
+    tenant_id: str = Depends(require_tenant)
+) -> dict:
+    with tenant_session(tenant_id) as s:
+        project_or_404(s, project_id)
+        new_id = str(uuid.uuid4())
+        s.execute(text(
+            "INSERT INTO deliverables (id, project_id, name, type) VALUES (:id, :pid, :name, :type)"
+        ), {"id": new_id, "pid": project_id, "name": body.name, "type": body.deliverable_type})
+    return {"id": new_id}</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">HTTPException — returning error responses</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python</div><pre><code class="language-python">from fastapi import HTTPException
+
+# Raise like a normal Python exception — FastAPI catches it and returns JSON
+raise HTTPException(status_code=404, detail="Project not found")
+raise HTTPException(status_code=401, detail="sign in required")
+raise HTTPException(status_code=400, detail="name must not be empty")
+raise HTTPException(status_code=409, detail="deliverable already exists")
+raise HTTPException(status_code=429, detail="too many concurrent streams")
+
+# The response body FastAPI sends:
+# {"detail": "Project not found"}
+
+# Custom helper pattern used in this project:
+def project_or_404(session, project_id: str):
+    row = session.execute(
+        text("SELECT id FROM projects WHERE id = :id"),
+        {"id": project_id}
+    ).fetchone()
+    if not row:
+        raise HTTPException(404, f"project {project_id} not found")
+    return row</code></pre></div>
+      <table>
+        <thead><tr><th>Status code</th><th>Meaning</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td><code>200</code></td><td>OK</td><td>Default for GET / successful reads</td></tr>
+          <tr><td><code>201</code></td><td>Created</td><td>POST that creates a new resource</td></tr>
+          <tr><td><code>400</code></td><td>Bad Request</td><td>Client sent invalid data</td></tr>
+          <tr><td><code>401</code></td><td>Unauthorized</td><td>Not authenticated (no valid token)</td></tr>
+          <tr><td><code>403</code></td><td>Forbidden</td><td>Authenticated but no permission</td></tr>
+          <tr><td><code>404</code></td><td>Not Found</td><td>Resource doesn't exist</td></tr>
+          <tr><td><code>409</code></td><td>Conflict</td><td>Duplicate; concurrent write collision</td></tr>
+          <tr><td><code>422</code></td><td>Unprocessable Entity</td><td>FastAPI's automatic validation error (wrong type, missing field)</td></tr>
+          <tr><td><code>429</code></td><td>Too Many Requests</td><td>Rate limit or concurrency limit hit</td></tr>
+          <tr><td><code>500</code></td><td>Internal Server Error</td><td>Unhandled exception — check logs</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Pydantic models — request and response validation</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python</div><pre><code class="language-python">from pydantic import BaseModel, Field
+from datetime import datetime
+
+# Request body model — validates incoming JSON
+class CreateProjectRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    description: str | None = None
+    client_name: str
+
+# Response model — controls what fields are returned
+class ProjectResponse(BaseModel):
+    id: str
+    name: str
+    status: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}   # allows .model_validate(orm_row)
+
+# Use in route with response_model for automatic serialization + docs
+@router.post("/", response_model=ProjectResponse, status_code=201)
+def create_project(body: CreateProjectRequest, tenant_id=Depends(require_tenant)):
+    row = insert_project(body.name, body.client_name)
+    return ProjectResponse.model_validate(row)   # converts ORM row to response
+
+# Pydantic auto-validates:
+# - Missing required fields → 422
+# - Wrong type → 422
+# - Field out of range (min_length etc) → 422
+# FastAPI returns the validation error details automatically</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">FastAPI app structure — main.py and routers</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python — main.py (the entry point)</div><pre><code class="language-python">from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.routers import projects, deliverables, stream, meta
+
+app = FastAPI(title="Scribtive API", version="1.0")
+
+# CORS — allows the frontend (localhost:5173) to call this backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "https://yourdomain.com"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Register routers — each router adds its own prefix routes to the app
+app.include_router(meta.router)
+app.include_router(projects.router)
+app.include_router(deliverables.router)
+app.include_router(stream.router)
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}</code></pre></div>
+      <div class="code-wrap"><div class="code-label">python — a router file (routers/projects.py)</div><pre><code class="language-python">from fastapi import APIRouter, Depends
+from app.auth import require_tenant
+from app.tenancy import tenant_session
+from sqlalchemy import text
+
+# All routes in this file will be prefixed with /api/projects
+router = APIRouter(prefix="/api/projects", tags=["projects"])
+
+@router.get("/")
+def list_projects(tenant_id: str = Depends(require_tenant)) -> list[dict]:
+    with tenant_session(tenant_id) as s:
+        rows = s.execute(text("SELECT id, name FROM projects")).fetchall()
+    return [{"id": r.id, "name": r.name} for r in rows]
+
+@router.post("/")
+def create_project(body: CreateProjectRequest, tenant_id=Depends(require_tenant)):
+    ...</code></pre></div>
+      <div class="alert info"><strong>Tags</strong> The <code>tags=["projects"]</code> parameter groups routes in FastAPI's auto-generated docs at <code>http://localhost:8010/docs</code>. Open that URL when the backend is running to see all routes interactively.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">pydantic-settings — loading .env into config</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python — app/config.py</div><pre><code class="language-python">from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    anthropic_api_key: str = ""
+    database_url: str = ""
+    dev_mode: bool = False
+    supabase_url: str = ""
+    supabase_anon_key: str = ""
+
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+
+settings = Settings()   # reads backend/.env automatically on import
+
+# Access anywhere in the app:
+from app.config import settings
+print(settings.dev_mode)         # True
+print(settings.anthropic_api_key)  # "sk-ant-..."</code></pre></div>
+      <div class="code-wrap"><div class="code-label">bash — backend/.env file</div><pre><code class="language-bash">ANTHROPIC_API_KEY=sk-ant-api03-...
+DATABASE_URL=postgresql://postgres:postgres@localhost:5433/scribtive_dev
+DEV_MODE=true
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_ANON_KEY=eyJ...</code></pre></div>
+      <div class="alert danger"><strong>pydantic-settings does NOT set os.environ</strong> Values go into <code>settings.x</code> only. Subprocesses that call <code>os.environ["ANTHROPIC_API_KEY"]</code> won't find it. Fix: after loading settings, copy to os.environ: <code>os.environ["ANTHROPIC_API_KEY"] = settings.anthropic_api_key</code></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">PATCH vs PUT vs DELETE — update and delete patterns</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python</div><pre><code class="language-python">class PatchRequest(BaseModel):
+    name: str | None = None         # all fields optional for PATCH
+    description: str | None = None
+
+# PATCH: partial update — only update provided fields
+@router.patch("/{id}")
+def update_project(id: str, body: PatchRequest, tenant_id=Depends(require_tenant)):
+    # Build the SET clause only for provided fields
+    updates = {k: v for k, v in body.model_dump().items() if v is not None}
+    if not updates:
+        raise HTTPException(400, "no fields to update")
+    set_clause = ", ".join(f"{k} = :{k}" for k in updates)
+    with tenant_session(tenant_id) as s:
+        project_or_404(s, id)
+        s.execute(text(f"UPDATE projects SET {set_clause} WHERE id = :id"),
+                  {**updates, "id": id})
+    return {"ok": True}
+
+# DELETE
+@router.delete("/{id}", status_code=204)
+def delete_project(id: str, tenant_id=Depends(require_tenant)):
+    with tenant_session(tenant_id) as s:
+        project_or_404(s, id)
+        s.execute(text("DELETE FROM projects WHERE id = :id"), {"id": id})
+    # 204 = No Content — return nothing</code></pre></div>
+      <table>
+        <thead><tr><th>Method</th><th>Meaning</th><th>Body</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET</code></td><td>Read — no side effects</td><td>None</td><td>200</td></tr>
+          <tr><td><code>POST</code></td><td>Create new resource</td><td>Full object</td><td>201</td></tr>
+          <tr><td><code>PUT</code></td><td>Replace full resource</td><td>Full object</td><td>200</td></tr>
+          <tr><td><code>PATCH</code></td><td>Partial update — only changed fields</td><td>Partial object</td><td>200</td></tr>
+          <tr><td><code>DELETE</code></td><td>Remove resource</td><td>None</td><td>204</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Background tasks — run work after the response is sent</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python</div><pre><code class="language-python">from fastapi import BackgroundTasks
+
+def send_notification_email(to: str, project_name: str):
+    # This runs AFTER the response has been sent to the client
+    email_client.send(to=to, subject=f"Project '{project_name}' created")
+
+@router.post("/")
+def create_project(
+    body: CreateProjectRequest,
+    background_tasks: BackgroundTasks,    # FastAPI injects this
+    tenant_id=Depends(require_tenant)
+):
+    project = insert_project(body.name)
+
+    # Add work to run after response — client doesn't wait for this
+    background_tasks.add_task(send_notification_email, body.client_email, body.name)
+
+    return {"id": project.id}   # returns immediately, email sends after</code></pre></div>
+      <p><strong>Use for:</strong> sending emails, logging analytics, triggering async jobs. <strong>Don't use for:</strong> work the response depends on, or work that must survive a server restart (use a proper queue like Celery or RQ for that).</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Auto-generated docs — FastAPI's superpower</div></div></div>
+    <div class="card-body">
+      <p>FastAPI generates interactive API docs automatically from your code. While the backend is running, open:</p>
+      <ul>
+        <li><code>http://localhost:8010/docs</code> — Swagger UI: test every route in the browser</li>
+        <li><code>http://localhost:8010/redoc</code> — ReDoc: cleaner read-only reference</li>
+        <li><code>http://localhost:8010/openapi.json</code> — raw OpenAPI schema (JSON)</li>
+      </ul>
+      <div class="alert tip"><strong>Testing routes without a frontend</strong> Use <code>/docs</code> to try each endpoint directly. Click a route → "Try it out" → fill in parameters → Execute. Saves you writing curl commands for every test.</div>
+    </div>
+  </div>
+
+  <div id="pat-search" class="group-title">🔎 Hybrid vector search pattern</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Vector pre-filter + lexical reranking</div><div class="card-sub">The exact pattern in library_search.py</div></div></div>
+    <div class="card-body">
+      <p><strong>The problem with pure vector search:</strong> returns semantically similar results, but might miss exact keyword matches. <strong>Pure lexical (keyword):</strong> misses paraphrasing. <strong>Hybrid:</strong> uses vector to fetch a wide candidate set, then lexical scoring to rerank the best ones.</p>
+      <div class="code-wrap"><div class="code-label">python — the full pattern</div><pre><code class="language-python">def search_shelf(session, shelf, query, k=5):
+    try:
+        # 1. Embed the query
+        qv = embed_texts([query])[0]
+        vec_str = "[" + ",".join(str(x) for x in qv) + "]"
+
+        # 2. Vector pre-filter: fetch k*4 candidates from DB
+        #    (much cheaper than fetching all rows into Python)
+        candidates = session.execute(text("""
+            SELECT lp.doc_id, ld.title, lp.page, lp.text,
+                   1 - (lp.embedding_vec <=> :vec::vector) AS vec_sim
+            FROM library_pages lp JOIN library_docs ld ON ld.id = lp.doc_id
+            WHERE ld.shelf = :shelf AND ld.status = 'ready'
+              AND lp.embedding_vec IS NOT NULL
+            ORDER BY lp.embedding_vec <=> :vec::vector
+            LIMIT :limit
+        """), {"shelf": shelf, "vec": vec_str, "limit": k * 4}).fetchall()
+
+        if candidates:
+            # 3. Rerank with hybrid score:
+            #    60% vector similarity + 40% lexical (BM25-like keyword score)
+            scored = sorted(
+                [{"title": r.title, "page": r.page, "excerpt": r.text[:800],
+                  "score": round(0.6 * float(r.vec_sim)
+                                 + 0.4 * score_page(query, r.text), 4)}
+                 for r in candidates],
+                key=lambda x: -x["score"]
+            )
+            return [r for r in scored[:k] if r["score"] > 0]
+
+    except Exception:   # pgvector not enabled → fallback
+        pass
+
+    # 4. Lexical-only fallback (always works)
+    rows = session.execute(text("""
+        SELECT ld.title, lp.page, lp.text
+        FROM library_pages lp JOIN library_docs ld ON ld.id = lp.doc_id
+        WHERE ld.shelf = :shelf AND ld.status = 'ready'
+    """), {"shelf": shelf}).fetchall()
+
+    scored = sorted([{"title": r.title, "page": r.page, "excerpt": r.text[:800],
+                      "score": round(score_page(query, r.text), 4)}
+                     for r in rows], key=lambda x: -x["score"])
+    return [r for r in scored[:k] if r["score"] > 0]</code></pre></div>
+      <p><strong>Key decisions:</strong></p>
+      <ul>
+        <li><code>k * 4</code> candidates: fetch 20 if you want top 5. The vector filter is approximate — lexical reranking can change the order significantly.</li>
+        <li>60/40 split: tunable. More weight on vector = more semantic. More on lexical = more keyword-exact.</li>
+        <li><code>except Exception: pass</code>: if pgvector isn't enabled in prod yet, fall through to lexical. Never hard-fail on missing extension.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="pat-amr" class="group-title">🔑 Auth patterns &amp; cost</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Microsoft OAuth — AMR (Authentication Methods Reference)</div><div class="card-sub">The field inside every JWT that says how the user proved their identity</div></div></div>
+    <div class="card-body">
+      <p>Every Supabase JWT has an <code>amr</code> field recording <em>how</em> the user authenticated. The app checks this to ensure users proved identity with a verified method — not just a password, which doesn't confirm email ownership.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Before — Microsoft users got 403</div>
+          <pre><code class="language-python"># supabase_auth.py
+_TRUSTED_AMR_METHODS = {"otp", "magiclink"}
+# Microsoft sign-in produces "oauth"
+# → rejected, even though it's valid</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ After — all valid providers accepted</div>
+          <pre><code class="language-python">_TRUSTED_AMR_METHODS = {
+    "otp", "magiclink", "oauth"
+}
+# "oauth" = Microsoft, Google, GitHub etc.</code></pre>
+        </div>
+      </div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>AMR value</th><th>Meaning</th><th>Trusted?</th></tr></thead>
+        <tbody>
+          <tr><td><code>otp</code></td><td>Magic link email code</td><td><span class="badge badge-green">Yes</span></td></tr>
+          <tr><td><code>magiclink</code></td><td>Magic link (Supabase alias)</td><td><span class="badge badge-green">Yes</span></td></tr>
+          <tr><td><code>oauth</code></td><td>Microsoft, Google, GitHub (external provider)</td><td><span class="badge badge-green">Yes</span></td></tr>
+          <tr><td><code>password</code></td><td>Email + password — doesn't prove you own the email</td><td><span class="badge badge-red">No</span></td></tr>
+        </tbody>
+      </table></div>
+      <p>Supabase sets this server-side — users cannot fake the <code>amr</code> value in their JWT.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Prompt caching — the financial math</div><div class="card-sub">Why adding cache_control to system prompts can save ~90% on repeated calls</div></div></div>
+    <div class="card-body">
+      <p>Anthropic caches system prompts for <strong>5 minutes</strong>. Cache reads cost approximately <strong>10% of the normal input token price</strong>.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Before — full price every call</div>
+          <pre><code class="language-python">response = client.messages.create(
+    system=SYSTEM_PROMPT,
+    ...
+)</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ After — 10% on cache hits</div>
+          <pre><code class="language-python">response = client.messages.create(
+    system=[{
+        "type": "text",
+        "text": SYSTEM_PROMPT,
+        "cache_control": {"type": "ephemeral"}
+    }],
+    ...
+)</code></pre>
+        </div>
+      </div>
+      <div class="code-wrap"><div class="code-label">math — 100 calls in 5 minutes</div><pre><code class="language-bash"># Without caching: 100 calls × 100% = 10,000 units of cost
+# With caching:
+#   Call 1: 100%  (cache miss — creates the cache)
+#   Calls 2–100: 10% each (cache hits)
+#   Total: 100% + (99 × 10%) = 100% + 990% = 1,090 units
+#   Saving: 10,000 → 1,090 = about 89% reduction
+
+# Cache TTL: 5 minutes. If no new eligible request
+# arrives within 5 min, the next call is a miss again.</code></pre></div>
+      <div class="alert tip"><strong>This project</strong> Applied <code>cache_control</code> to all 14 system prompt calls in <code>llm.py</code>. The system prompt doesn't change between calls, so every call after the first (within 5 min) is a cache hit.</div>
+    </div>
+  </div>
+
+  <div id="pat-security" class="group-title">🔒 Security rules</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">API key security — the rules that matter</div></div></div>
+    <div class="card-body">
+      <div class="alert danger"><strong>API key exposed in chat?</strong> Rotate it immediately at console.anthropic.com → API Keys → the key → Disable or Delete. A key pasted in chat may be logged. Do not wait.</div>
+      <table>
+        <thead><tr><th>Rule</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Never paste API keys in chat</strong></td><td>Chat logs may be stored and indexed</td></tr>
+          <tr><td><strong>Never put tokens in URL query strings</strong></td><td>URLs appear in proxy logs, browser history, server access logs</td></tr>
+          <tr><td><strong>Never commit .env to git</strong></td><td>Git history is public and permanent. <code>git add -A</code> can include it accidentally</td></tr>
+          <tr><td><strong>Use parameterized SQL</strong></td><td>User input in f-strings → SQL injection</td></tr>
+          <tr><td><strong>Validate UUIDs before trusting headers</strong></td><td>Any string in an X-Tenant-Id header could be an injection attempt</td></tr>
+        </tbody>
+      </table>
+      <div class="code-wrap"><div class="code-label">bash — add .env to gitignore</div><pre><code class="language-bash">echo ".env" >> .gitignore
+echo ".env.local" >> .gitignore
+git rm --cached backend/.env    # if already committed</code></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Dev auth pattern — trust headers only in dev mode</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">python — auth.py</div><pre><code class="language-python">def require_tenant(
+    authorization: str | None = Header(default=None),
+    x_tenant_id: str | None = Header(default=None)
+) -> str:
+    if settings.dev_mode and x_tenant_id:
+        try:
+            uuid.UUID(x_tenant_id)   # validate format even in dev
+        except ValueError:
+            raise HTTPException(401, "X-Tenant-Id must be a UUID")
+        return x_tenant_id
+
+    # Production: validate JWT from Authorization header
+    # ...
+    raise HTTPException(401, "sign in required")</code></pre></div>
+      <div class="code-wrap"><div class="code-label">typescript — frontend authHeaders()</div><pre><code class="language-typescript">export function authHeaders(): Record&lt;string, string&gt; {
+  const headers: Record&lt;string, string&gt; = {}
+  if (session?.access_token) {
+    headers.Authorization = `Bearer ${session.access_token}`   // prod
+  } else {
+    const tenant = currentTenant()    // from localStorage in dev
+    if (tenant) headers["X-Tenant-Id"] = tenant
+  }
+  return headers
+}</code></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ RUNNING THE APP ════════════════════════ -->
+<div class="section" id="section-running">
+  <div class="section-header">
+    <div class="section-title">Running the App</div>
+    <div class="section-intro">Exact commands for this project. Backend on port 8010, frontend on port 5173. Both must be running to use the app locally.</div>
+  </div>
+
+  <div id="run-backend" class="group-title">🐍 Backend (FastAPI + uvicorn)</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Start the backend</div><div class="card-sub">Always from the backend/ directory</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">powershell — first time setup</div><pre><code class="language-bash">cd backend
+py -3.12 -m venv .venv              # create venv (once only)
+.venv\Scripts\pip install -e .      # install deps (once, re-run if pyproject.toml changes)
+alembic upgrade head                # run migrations (once, re-run after new migrations)</code></pre></div>
+      <div class="code-wrap"><div class="code-label">powershell — every day</div><pre><code class="language-bash">cd backend
+.\dev.cmd</code></pre></div>
+      <div class="alert info"><strong>What dev.cmd does</strong> Activates <code>.venv\Scripts\activate.bat</code> then runs <code>python -m uvicorn app.main:app --port 8010 --reload</code>. The <code>--reload</code> flag auto-restarts on Python file changes.</div>
+      <div class="alert warn"><strong>Must restart for .env changes</strong> <code>--reload</code> watches <code>.py</code> files only. Change any <code>.env</code> value → Ctrl+C → <code>.\dev.cmd</code> again.</div>
+      <table>
+        <thead><tr><th>What you see</th><th>Means</th></tr></thead>
+        <tbody>
+          <tr><td><code>Uvicorn running on http://0.0.0.0:8010</code></td><td>Backend is ready</td></tr>
+          <tr><td><code>Application startup complete.</code></td><td>All startup hooks ran OK</td></tr>
+          <tr><td><code>WARNING: WatchFiles force reload</code></td><td>A .py file changed, auto-reloaded</td></tr>
+          <tr><td><code>ERROR: ... No module named ...</code></td><td>Package missing — run <code>.venv\Scripts\pip install -e .</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Backend test commands</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">powershell</div><pre><code class="language-bash">cd backend
+
+# Run all tests
+python -m pytest -q
+
+# Stop at first failure (fastest feedback)
+python -m pytest -x
+
+# Run one file
+python -m pytest tests/test_stream_api.py -v
+
+# Run one specific test
+python -m pytest tests/test_stream_api.py::test_stream_returns_events -v
+
+# Show stdout during tests (useful for debugging)
+python -m pytest -s
+
+# Show which tests are slowest
+python -m pytest --durations=10</code></pre></div>
+      <div class="code-wrap"><div class="code-label">powershell — manual API testing with curl</div><pre><code class="language-bash"># Test the health / config endpoint
+curl http://localhost:8010/api/config
+
+# Test with auth headers (dev mode — use a real UUID from your tenant table)
+curl http://localhost:8010/api/projects `
+  -H "X-Tenant-Id: 00000000-0000-0000-0000-000000000001"
+
+# Seed the local database with dev tenants and sample data
+python scripts\seed_dev.py</code></pre></div>
+    </div>
+  </div>
+
+  <div id="run-frontend" class="group-title">⚛️ Frontend (Vite + React)</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Start the frontend</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">powershell — first time</div><pre><code class="language-bash">cd frontend
+npm install         # install node_modules (once, re-run if package.json changes)</code></pre></div>
+      <div class="code-wrap"><div class="code-label">powershell — every day</div><pre><code class="language-bash">cd frontend
+npm run dev</code></pre></div>
+      <div class="alert info"><strong>URL</strong> Frontend runs at <code>http://localhost:5173</code> by default (Vite's default port). It hot-reloads on save — no manual restart needed.</div>
+      <div class="code-wrap"><div class="code-label">powershell — other frontend commands</div><pre><code class="language-bash">npm run build       # production build → dist/ folder
+npm run preview     # preview the production build locally
+npm run lint        # run the linter (oxlint in this project)
+npm test            # run frontend tests</code></pre></div>
+      <table>
+        <thead><tr><th>What you see</th><th>Means</th></tr></thead>
+        <tbody>
+          <tr><td><code>➜  Local:   http://localhost:5173/</code></td><td>Frontend is ready — open this in browser</td></tr>
+          <tr><td><code>[vite] hot updated</code></td><td>File saved, browser auto-updated</td></tr>
+          <tr><td><code>EADDRINUSE</code></td><td>Port 5173 already in use — another vite is running; kill it or use <code>npm run dev -- --port 5174</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Required: run BOTH at the same time</div><div class="card-sub">Open two terminal windows</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">window 1 — backend</div><pre><code class="language-bash">cd "C:\Users\hhy26\OneDrive - University of Cambridge\Desktop\03_AutomateX\Scribtive-OS\backend"
+.\dev.cmd</code></pre></div>
+      <div class="code-wrap"><div class="code-label">window 2 — frontend</div><pre><code class="language-bash">cd "C:\Users\hhy26\OneDrive - University of Cambridge\Desktop\03_AutomateX\Scribtive-OS\frontend"
+npm run dev</code></pre></div>
+      <p>Then open <code>http://localhost:5173</code> in a browser. The frontend proxies API calls to <code>http://localhost:8010</code> (configured in <code>vite.config.ts</code>).</p>
+    </div>
+  </div>
+
+  <div id="run-trouble" class="group-title">🔧 Troubleshooting</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Symptom → cause → fix</div></div></div>
+    <div class="card-body">
+      <table>
+        <thead><tr><th>Symptom</th><th>Most likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>Backend won't start, <code>No module named uvicorn</code></td><td>venv not activated or deps not installed</td><td><code>.venv\Scripts\pip install -e .</code> then <code>.\dev.cmd</code></td></tr>
+          <tr><td>Backend starts but crashes immediately</td><td><code>.env</code> missing or has wrong values</td><td>Check <code>backend/.env</code> exists and has all required keys</td></tr>
+          <tr><td>Frontend starts but API calls fail with CORS error</td><td>Backend not running on 8010, or vite proxy misconfigured</td><td>Check backend is running; check <code>vite.config.ts</code> proxy target</td></tr>
+          <tr><td>Frontend shows 401 on every request</td><td>No tenant selected in Settings, or dev_mode=False with no JWT</td><td>Open Settings, select tenant; check <code>DEV_MODE=true</code> in backend <code>.env</code></td></tr>
+          <tr><td>Empty tenant dropdown in Settings</td><td>Local database has no tenant rows</td><td><code>python scripts\seed_dev.py</code></td></tr>
+          <tr><td>Chat says "(the turn failed after this point.)"</td><td>claude-agent-sdk subprocess fails (Windows + uvicorn --reload)</td><td>Known issue. Check backend logs for <code>RuntimeError: aclose()</code>. DriverHandle workaround is in <code>agent_runtime.py</code></td></tr>
+          <tr><td>Changes to <code>.env</code> not picked up</td><td>Hot reload only watches <code>.py</code> files</td><td>Ctrl+C the backend, restart with <code>.\dev.cmd</code></td></tr>
+          <tr><td>Database migration fails with <code>extension "vector" does not exist</code></td><td>Using plain <code>postgres:16</code> Docker image</td><td>Use <code>pgvector/pgvector:pg16</code>; delete and recreate container</td></tr>
+          <tr><td><code>alembic.util.exc.CommandError: Can't locate revision</code></td><td>Migration history out of sync</td><td><code>alembic current</code> to see state; <code>alembic stamp head</code> to mark all as applied if DB is up to date</td></tr>
+          <tr><td>Frontend build fails with TypeScript errors</td><td>Type errors that <code>--reload</code> ignores at runtime</td><td><code>npm run build</code> or <code>npx tsc --noEmit</code> to see all type errors</td></tr>
+          <tr><td>Port already in use</td><td>Previous process still running</td><td>Windows: <code>netstat -ano | findstr :8010</code> then <code>taskkill /PID &lt;pid&gt; /F</code></td></tr>
+          <tr><td>Every API call returns <code>500</code> after fresh Docker setup</td><td><code>scribtive_app</code> database role missing — a fresh container has no roles except <code>postgres</code></td><td><code>docker exec scribtive-pg psql -U postgres -d scribtive_dev -c "CREATE ROLE scribtive_app;"</code> (run once after container creation)</td></tr>
+          <tr><td>API calls return "foreign key violation" or wrong-tenant errors after DB wipe</td><td>Browser <code>localStorage</code> has stale tenant UUID from before the wipe — new tenants have different UUIDs</td><td>Open the app → Settings → re-select a tenant from the dropdown. This updates localStorage.</td></tr>
+          <tr><td>Chat fails with "out-of-request metered spend" or billing guard error</td><td><code>SCRIBTIVE_ALLOW_METERED_OUT_OF_REQUEST</code> not set, or set in PowerShell but not in <code>.env</code></td><td>Add <code>SCRIBTIVE_ALLOW_METERED_OUT_OF_REQUEST=1</code> to <code>backend/.env</code> then restart backend</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Reading backend logs</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">log output — what to look for</div><pre><code class="language-bash"># Good startup:
+INFO:     Started server process [12345]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8010 (Press CTRL+C to quit)
+
+# Request log — every API call:
+INFO:     127.0.0.1:54321 - "GET /api/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54321 - "POST /api/projects/x/deliverables/y/message/stream HTTP/1.1" 200 OK
+
+# Red flags to grep for in logs:
+# "ERROR"     → something actually broke
+# "WARNING"   → non-fatal but worth checking
+# "Traceback" → Python exception — the lines after tell you where
+# "aclose()"  → async generator issue (Windows subprocess problem)</code></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════ REACT HOOKS EXTENDED ════════════════════════ -->
+<!-- Inserted at end — use the React section anchor in nav, these appear after section-react -->
+<div class="section" id="section-react-hooks">
+  <!-- This section is accessed via nav sub-links pointing to section-react with anchors.
+       These cards are embedded directly into section-react via JS on load. -->
+</div>
+</main>
+</div>
+
+<script>
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
+  document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'))
+  document.getElementById('section-' + id).classList.add('active')
+  if (btn) btn.classList.add('active')
+  window.scrollTo(0, 0)
+}
+
+function anchorTo(id) {
+  setTimeout(() => {
+    const el = document.getElementById(id)
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, 50)
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b))
+  document.querySelectorAll('.code-wrap').forEach(wrap => {
+    const label = wrap.querySelector('.code-label')
+    if (!label) return
+    const btn = document.createElement('button')
+    btn.className = 'copy-btn'
+    btn.textContent = 'copy'
+    label.appendChild(btn)
+    btn.addEventListener('click', () => {
+      const code = wrap.querySelector('code')
+      if (!code) return
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        btn.textContent = 'copied!'
+        setTimeout(() => btn.textContent = 'copy', 1500)
+      })
+    })
+  })
+})
+</script>
+</body>
+</html>
