@@ -154,6 +154,9 @@ hr{border:none;border-top:1px solid var(--border);margin:28px 0}
   <div class="nav-section">
     <div class="nav-section-label">Docker</div>
     <button class="nav-item" onclick="showSection('docker',this)"><span class="icon">🐳</span>Containers &amp; Commands</button>
+    <div class="nav-sub">
+      <button class="nav-item" onclick="showSection('docker',this);anchorTo('docker-elestio')"><span class="icon">🚨</span>Elestio debugging</button>
+    </div>
   </div>
   <div class="nav-section">
     <div class="nav-section-label">SQL / PostgreSQL</div>
@@ -162,6 +165,7 @@ hr{border:none;border-top:1px solid var(--border);margin:28px 0}
       <button class="nav-item" onclick="showSection('sql',this);anchorTo('sql-inspect')"><span class="icon">🔍</span>Inspecting tables</button>
       <button class="nav-item" onclick="showSection('sql',this);anchorTo('sql-migrations')"><span class="icon">📦</span>Alembic / migrations</button>
       <button class="nav-item" onclick="showSection('sql',this);anchorTo('sql-sqlalchemy')"><span class="icon">🔗</span>SQLAlchemy</button>
+      <button class="nav-item" onclick="showSection('sql',this);anchorTo('sql-transactions')"><span class="icon">⚡</span>Transaction safety</button>
     </div>
   </div>
   <div class="nav-section">
@@ -202,6 +206,7 @@ hr{border:none;border-top:1px solid var(--border);margin:28px 0}
       <button class="nav-item" onclick="showSection('patterns',this);anchorTo('pat-search')"><span class="icon">🔎</span>Hybrid search</button>
       <button class="nav-item" onclick="showSection('patterns',this);anchorTo('pat-amr')"><span class="icon">🔑</span>OAuth AMR / prompt cache</button>
       <button class="nav-item" onclick="showSection('patterns',this);anchorTo('pat-security')"><span class="icon">🔒</span>Security rules</button>
+      <button class="nav-item" onclick="showSection('patterns',this);anchorTo('pat-llm')"><span class="icon">🤖</span>LLM &amp; Agent SDK</button>
     </div>
   </div>
 
@@ -443,6 +448,57 @@ grep -rn "assert_called_with" tests/      # 4. call argument assertions</code></
     </div>
   </div>
 
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Pushing after a PR is merged — the commit is invisible on that PR and on <code>main</code></div></div></div>
+    <div class="card-body">
+      <div class="alert danger"><strong>Merged PR is frozen.</strong> After a PR merges, GitHub freezes its commit list. Any new push to the same branch appears nowhere useful — not on the closed PR, not on <code>main</code>.</div>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Push to merged branch — invisible</div>
+          <pre><code class="language-bash"># PR #43 already merged into main
+git add .
+git commit -m "fix: add missing guard"
+git push origin fix/ruff-billing-unused-import
+# → commit exists on GitHub but is not in main
+# → not shown on PR #43 (closed)
+# → your reviewer "cannot see the commit"</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ New PR for follow-up work</div>
+          <pre><code class="language-bash"># After PR #43 merged, start fresh from main
+git fetch origin main
+git checkout -B fix/ruff-billing-unused-import origin/main
+git add .
+git commit -m "fix: add missing guard"
+git push -u origin fix/ruff-billing-unused-import
+# → open a NEW PR — this is PR #44, not #43</code></pre>
+        </div>
+      </div>
+      <p>Confirm with <code>git log origin/main..HEAD</code> — if your commit doesn't appear there, it's not in <code>main</code>. Do not look at the closed PR's commit list or the merge commit SHA.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">CI runs pytest <em>then</em> ruff — a pytest-only local run misses lint</div><div class="card-sub">Run both before push or CI will surprise you</div></div></div>
+    <div class="card-body">
+      <div class="code-wrap"><div class="code-label">bash — run the same sequence as CI</div><pre><code class="language-bash">cd backend
+python -m pytest -q          # 1. tests first
+ruff check .                 # 2. lint second — mirrors CI order
+ruff format --check .        # 3. format check (if your ci.yml runs it)</code></pre></div>
+      <div class="alert warn"><strong>Common pattern:</strong> pytest passes locally → push → CI green on tests → CI fails on ruff. Because you only ran pytest.</div>
+      <p>Ruff rules that come up most often after code changes:</p>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Code</th><th>Meaning</th><th>Typical cause</th></tr></thead>
+        <tbody>
+          <tr><td><code>F401</code></td><td>Unused import</td><td>Refactored a function and forgot to remove its import</td></tr>
+          <tr><td><code>I001</code></td><td>Import block unsorted / not split</td><td>Added an import without running isort</td></tr>
+          <tr><td><code>TRY004</code></td><td>After <code>isinstance</code>, raise <code>TypeError</code> not <code>RuntimeError</code></td><td>Wrong exception type in type-guard</td></tr>
+          <tr><td><code>RUF100</code></td><td>Unused <code># noqa</code> comment</td><td>Fixed the issue the noqa was suppressing but left the comment</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
   <div id="git-worktrees" class="group-title">🌲 Worktrees</div>
 
   <div class="card">
@@ -570,6 +626,56 @@ storage_root = "/app/storage"  # absolute path
         </tbody>
       </table></div>
       <p><strong>Rule of thumb:</strong> If a file needs to survive a deployment, it must live outside the container — in a volume or an external storage service.</p>
+    </div>
+  </div>
+
+  <div id="docker-elestio" class="group-title">🚨 Elestio production debugging</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Pipeline "deployed" ≠ app is running — use <code>docker logs</code>, not the CI log</div><div class="card-sub">The most common waste-of-time in a production 502</div></div></div>
+    <div class="card-body">
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Log source</th><th>What it proves</th><th>What it does NOT prove</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Elestio pipeline / CI log</strong><br><code>npm ci</code>, <code>vite build</code>,<br><code>Container Started</code>,<br><code>Pipeline deployment completed</code></td><td>Image built and Compose started a container</td><td>uvicorn is serving :8080, migrations finished, healthz returns 200</td></tr>
+          <tr><td><strong><code>docker logs scribtive-os-scribtive-os-1</code></strong></td><td>Entrypoint, Alembic, uvicorn, Python tracebacks, API key warnings</td><td>Browser-only OAuth / SPA issues</td></tr>
+          <tr><td><strong>Browser Network tab</strong></td><td>Proxy vs app: Elestio 502 HTML vs FastAPI JSON</td><td>Root cause inside the container</td></tr>
+          <tr><td><strong>GitHub Actions</strong></td><td>ruff / pytest on <code>main</code></td><td>Production env vars or Elestio runtime</td></tr>
+        </tbody>
+      </table></div>
+      <div class="alert danger"><strong>Pipeline ≠ app up.</strong> The entrypoint runs Alembic migrations before binding :8080. Until you see <code>starting uvicorn on :8080</code> in docker logs, the reverse proxy will 502. A green pipeline plus "Container Started" is not "the website works."</div>
+      <div class="code-wrap"><div class="code-label">bash — commands that actually help (on the Elestio VM)</div><pre><code class="language-bash"># Runtime logs — not the pipeline
+docker logs --tail 200 scribtive-os-scribtive-os-1
+
+# Correlate a UI "support reference" hex
+docker logs scribtive-os-scribtive-os-1 2>&amp;&amp; grep -A 50 '77cc2ef4bced'
+
+# Confirm the actual compose working directory
+docker inspect scribtive-os-scribtive-os-1 \
+  --format '{{index .Config.Labels "com.docker.compose.project.working_dir"}}'
+
+# .env change is NOT enough — recreate the container
+cd /opt/app/scribtive-os   # or whatever working_dir says
+docker compose up -d       # runs from the right directory</code></pre></div>
+      <div class="alert warn"><strong>Compose directory matters.</strong> <code>docker compose up -d</code> from <code>/opt/app</code> fails with "no configuration file provided" because compose.yml lives in a subdirectory. Inspect the <code>project.working_dir</code> label first.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Production error → where to look</div><div class="card-sub">Match the symptom to the right log before touching code</div></div></div>
+    <div class="card-body">
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>What you see</th><th>Meaning</th><th>Where to look</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Orange Elestio "502 Bad Gateway" HTML</strong> (including <code>/api/healthz</code>)</td><td>Proxy has nothing healthy on port 8080 — uvicorn not up</td><td><code>docker logs</code> from <code>[entrypoint]</code> — look for migration crash or DSN error</td></tr>
+          <tr><td><strong>JSON 503</strong> from <code>/api/healthz</code></td><td>App is up but DB is unreachable</td><td>Check <code>DATABASE_URL</code> in Elestio env; <code>SELECT 1</code> healthcheck is failing</td></tr>
+          <tr><td><strong>"No workspace yet"</strong> after Microsoft SSO</td><td>Auth succeeded; authorisation failed — no <code>tenant_members</code> row</td><td>Run <code>invite_user.py</code> via <code>docker exec</code> with the exact Outlook email (no trailing <code>~</code>)</td></tr>
+          <tr><td><strong>"The turn failed after this point."</strong> in chat</td><td>LLM call or Agent SDK raised — HTTP was already 200 (SSE started)</td><td><code>docker logs</code> around the POST; look for <code>anthropic API error: API key is invalid</code></td></tr>
+          <tr><td><strong>"Something went wrong… reference <code>abc123</code>"</strong></td><td>Unhandled 500 — <code>app.main._unhandled_exception</code> caught it</td><td>Browser Network tab for the URL + status; then <code>docker logs</code> for <code>[abc123] unhandled exception</code> and the traceback after it</td></tr>
+        </tbody>
+      </table></div>
+      <div class="alert info"><strong>Elestio is a live tail, not a log warehouse.</strong> The Elestio dashboard "View app logs" shows only what's currently streaming. There is no searchable archive. Redeploys wipe Docker json-file logs. If you missed the crash window, reproduce it — don't search Elestio for the hex reference.</div>
+      <div class="alert warn"><strong>Secrets live on Elestio, not GitHub.</strong> Production <code>DATABASE_URL</code>, <code>ANTHROPIC_API_KEY</code>, <code>SUPABASE_*</code> are in the Elestio service env / VM <code>.env</code>. GitHub secrets are for CI. Changing GitHub will not fix a live 502 or invalid API key error.</div>
     </div>
   </div>
 </div>
@@ -774,10 +880,10 @@ def search_shelf(session: Session, shelf: str, query: str, k: int = 5) -> list[d
     rows = session.execute(
         text("""
             SELECT lp.doc_id, ld.title, lp.page, lp.text,
-                   1 - (lp.embedding_vec <=> :vec::vector) AS vec_sim
+                   1 - (lp.embedding_vec <=> CAST(:vec AS vector)) AS vec_sim
             FROM library_pages lp JOIN library_docs ld ON ld.id = lp.doc_id
             WHERE ld.shelf = :shelf AND ld.status = 'ready'
-            ORDER BY lp.embedding_vec <=> :vec::vector
+            ORDER BY lp.embedding_vec <=> CAST(:vec AS vector)
             LIMIT :limit
         """),
         {"shelf": shelf, "vec": vec_str, "limit": k * 4}
@@ -786,6 +892,123 @@ def search_shelf(session: Session, shelf: str, query: str, k: int = 5) -> list[d
     # Access columns by name: r.title, r.page, r.text, r.vec_sim
     return [{"title": r.title, "score": float(r.vec_sim)} for r in rows]</code></pre></div>
       <div class="alert tip"><strong>Session lifetime rule</strong> Open a short session per DB read. Never hold one session open across a long-running generator (like an SSE stream) — it ties up a database connection for the entire stream lifetime, which starves other requests. Open, read, close, sleep, repeat.</div>
+    </div>
+  </div>
+
+  <div id="sql-transactions" class="group-title">⚡ Transaction safety</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Never put <code>::</code> immediately after a named bind in <code>text()</code></div><div class="card-sub">SQLAlchemy parses <code>:name</code> as a bind — <code>:name::type</code> confuses the parser; Postgres errors</div></div></div>
+    <div class="card-body">
+      <p>SQLAlchemy's <code>text()</code> treats <code>:name</code> as a bind placeholder. Writing <code>:vec::vector</code> leaves the bind ambiguously parsed; Postgres then sees a <code>syntax error at or near ":"</code>. This error appears in the <strong>Postgres service logs</strong> in CI, not in the Python traceback — so it looks like a different test is failing when the real cause is one SQL call further up the stack.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Broken — Postgres syntax error</div>
+          <pre><code class="language-python">session.execute(text("""
+    SELECT 1 - (vec <=> :vec::vector)
+    FROM library_pages
+    ORDER BY vec <=> :vec::vector
+"""), {"vec": vec_str})
+# CI Postgres log: syntax error at or near ":"
+# Adaptive tests die on FK — looks unrelated</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Fixed — CAST() keeps bind clean</div>
+          <pre><code class="language-python">session.execute(text("""
+    SELECT 1 - (vec <=> CAST(:vec AS vector))
+    FROM library_pages
+    ORDER BY vec <=> CAST(:vec AS vector)
+"""), {"vec": vec_str})
+# :vec is a normal bind, CAST is SQL</code></pre>
+        </div>
+      </div>
+      <div class="alert tip"><strong>Rule</strong> In SQLAlchemy <code>text()</code>, cast a bound value with <code>CAST(:bind AS type)</code>, never <code>:bind::type</code>. The Postgres <code>::</code> shorthand works on literals, not placeholders.</div>
+      <div class="alert warn"><strong>Spotting it in CI</strong> Check the Postgres Docker service logs in the GitHub Actions dump, not just the pytest output. Look for <code>syntax error at or near ":"</code> occurring during the test run — FK violations and assertion errors in other tests can be downstream of this one broken SQL call.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">SAVEPOINT — safe fallback without destroying the caller's transaction</div><div class="card-sub">Use <code>session.begin_nested()</code> when a sub-query might fail in a shared session</div></div></div>
+    <div class="card-body">
+      <p>When a SQL statement errors, Postgres aborts the whole transaction. A full <code>session.rollback()</code> exits the abort state but also rolls back every uncommitted write the caller made in the same session — seeded rows, linked records, <code>SET LOCAL app.tenant_id</code> (RLS GUC). This triggers a cascade of apparently unrelated test failures.</p>
+      <div class="alert danger"><strong>Real cascade from one bad rollback:</strong> vector query errors → <code>session.rollback()</code> → coverage seeds gone → grill_items FK fails → <code>SET LOCAL app.tenant_id</code> cleared → RLS off → tenant B sees tenant A's rows. One rollback caused 28 test failures across 4 files.</div>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Before — recovers Postgres, destroys caller</div>
+          <pre><code class="language-python">try:
+    candidates = session.execute(
+        text("SELECT ... <=> :vec::vector ..."),
+        {"vec": vec_str}
+    ).fetchall()
+except Exception:
+    session.rollback()
+    # BAD: wipes caller's seeds,
+    # clears SET LOCAL tenant GUC,
+    # lexical fallback runs with no tenant</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ After — SAVEPOINT isolates the failure</div>
+          <pre><code class="language-python">candidates = []
+try:
+    with session.begin_nested():   # = SAVEPOINT
+        candidates = session.execute(
+            text("SELECT ... CAST(:vec AS vector) ..."),
+            {"vec": vec_str}
+        ).fetchall()
+except Exception:
+    candidates = []
+    # outer session intact:
+    # seeds, GUC, RLS all still live
+
+if candidates:
+    return hybrid_rank(candidates)
+# lexical fallback on same live session</code></pre>
+        </div>
+      </div>
+      <div class="alert tip"><strong>Rule</strong> Fallback logic after a SQL error belongs in <code>with session.begin_nested():</code>, not a bare <code>except Exception: session.rollback()</code>, whenever the session is shared with the caller.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Schema cutover: dual-write the new column in ingest AND in test fixtures</div><div class="card-sub">Migration backfills existing rows — new writes need updating too</div></div></div>
+    <div class="card-body">
+      <p>When you add a typed column (e.g. <code>embedding_vec vector(384)</code>) alongside a legacy column (<code>embedding jsonb</code>), the migration backfills existing rows only. Every ingest path and test fixture that only writes the old column leaves the new column NULL — and any query filtering <code>embedding_vec IS NOT NULL</code> returns zero results.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Before — new column stays NULL</div>
+          <pre><code class="language-python">session.execute(text("""
+    INSERT INTO library_pages
+      (..., embedding)
+    VALUES
+      (..., CAST(:e AS jsonb))
+"""), {"e": json.dumps(vec)})
+
+# test mock — wrong dimensions:
+monkeypatch.setattr(
+    embed_texts,
+    lambda _: [[0.0, 1.0]]  # 2-d, not 384
+)</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ After — dual-write both columns</div>
+          <pre><code class="language-python">vec_str = "[" + ",".join(str(x) for x in vec) + "]"
+session.execute(text("""
+    INSERT INTO library_pages
+      (..., embedding, embedding_vec)
+    VALUES
+      (..., CAST(:e AS jsonb),
+            CAST(:v AS vector))
+"""), {"e": json.dumps(vec), "v": vec_str})
+
+# test mock padded to production dims:
+_VEC_DIM = 384
+def _pad(values):
+    return (list(values) + [0.0]*_VEC_DIM)[:_VEC_DIM]
+monkeypatch.setattr(embed_texts,
+    lambda _: [_pad([0.0, 1.0])])</code></pre>
+        </div>
+      </div>
+      <div class="alert warn"><strong>Checklist after adding a typed column:</strong> (1) migration backfills existing rows; (2) ingest writes the new column; (3) test helpers write the new column; (4) mock dimensions match production width; (5) use <code>CAST(:v AS vector)</code> not <code>:v::vector</code> in all inserts.</div>
     </div>
   </div>
 </div>
@@ -2345,6 +2568,40 @@ def create_project(
     </div>
   </div>
 
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Changing a JSON error body is a contract change — grep tests first</div><div class="card-sub">Any key a test reads or a client expects is part of the API surface</div></div></div>
+    <div class="card-body">
+      <p>When you change what a route returns on failure (rename a key, add or remove a field, change a status code), every test that reads that response and every frontend that parses it breaks silently — no type error, just a wrong value at runtime.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Changed the key — test still expects old shape</div>
+          <pre><code class="language-python"># Route now returns:
+return JSONResponse(status_code=502, content={
+    "detail": "Anthropic API error: ...",
+    "cell": {"state": "error", "note": "..."}
+})
+# But the test was written for the OLD global handler shape:
+# {"detail": {"message": "...", "support_ref": "..."}}
+# → test fails on key access, not a meaningful assertion</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Grep for every reader before changing</div>
+          <pre><code class="language-bash"># Find every test that reads this route's error body
+grep -rn '"detail"' tests/test_ag_api.py
+grep -rn '"detail"' tests/test_llm_api_error.py
+grep -rn 'res.json()' tests/
+grep -rn 'response.json()' tests/
+
+# If you must change the shape, update ALL of them
+# and keep the old key alongside the new one
+# during a transition if the frontend reads it</code></pre>
+        </div>
+      </div>
+      <div class="alert warn"><strong>Route-local except vs global handler</strong> When you add <code>except LlmApiError</code> in a route, the global last-resort handler no longer owns that failure. Copy the global handler's response shape — especially the <code>detail</code> key — into your local except, then add the new fields.</div>
+      <p>Also grep for the route path itself: <code>grep -rn '"/ag/cell"' tests/</code> to find every test that hits this route, not just the ones in the obvious file.</p>
+    </div>
+  </div>
+
   <div id="pat-search" class="group-title">🔎 Hybrid vector search pattern</div>
 
   <div class="card">
@@ -2357,17 +2614,18 @@ def create_project(
         qv = embed_texts([query])[0]
         vec_str = "[" + ",".join(str(x) for x in qv) + "]"
 
-        # 2. Vector pre-filter: fetch k*4 candidates from DB
-        #    (much cheaper than fetching all rows into Python)
-        candidates = session.execute(text("""
-            SELECT lp.doc_id, ld.title, lp.page, lp.text,
-                   1 - (lp.embedding_vec <=> :vec::vector) AS vec_sim
-            FROM library_pages lp JOIN library_docs ld ON ld.id = lp.doc_id
-            WHERE ld.shelf = :shelf AND ld.status = 'ready'
-              AND lp.embedding_vec IS NOT NULL
-            ORDER BY lp.embedding_vec <=> :vec::vector
-            LIMIT :limit
-        """), {"shelf": shelf, "vec": vec_str, "limit": k * 4}).fetchall()
+        # 2. Vector pre-filter: SAVEPOINT isolates failure from caller's session.
+        #    A bare session.rollback() would wipe seeds + SET LOCAL tenant GUC.
+        with session.begin_nested():
+            candidates = session.execute(text("""
+                SELECT lp.doc_id, ld.title, lp.page, lp.text,
+                       1 - (lp.embedding_vec <=> CAST(:vec AS vector)) AS vec_sim
+                FROM library_pages lp JOIN library_docs ld ON ld.id = lp.doc_id
+                WHERE ld.shelf = :shelf AND ld.status = 'ready'
+                  AND lp.embedding_vec IS NOT NULL
+                ORDER BY lp.embedding_vec <=> CAST(:vec AS vector)
+                LIMIT :limit
+            """), {"shelf": shelf, "vec": vec_str, "limit": k * 4}).fetchall()
 
         if candidates:
             # 3. Rerank with hybrid score:
@@ -2381,10 +2639,10 @@ def create_project(
             )
             return [r for r in scored[:k] if r["score"] > 0]
 
-    except Exception:   # pgvector not enabled → fallback
-        pass
+    except Exception:   # vector path failed — SAVEPOINT rolled back, outer session intact
+        candidates = []
 
-    # 4. Lexical-only fallback (always works)
+    # 4. Lexical-only fallback (same live session — safe because SAVEPOINT, not rollback)
     rows = session.execute(text("""
         SELECT ld.title, lp.page, lp.text
         FROM library_pages lp JOIN library_docs ld ON ld.id = lp.doc_id
@@ -2525,6 +2783,103 @@ git rm --cached backend/.env    # if already committed</code></pre></div>
   }
   return headers
 }</code></pre></div>
+    </div>
+  </div>
+
+  <div id="pat-llm" class="group-title">🤖 LLM &amp; Agent SDK</div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Agent SDK requires <code>system_prompt</code> as a string — never a list</div><div class="card-sub">Metered Messages API and Claude Agent SDK have different shapes for the <code>system</code> field</div></div></div>
+    <div class="card-body">
+      <p>The Messages API accepts <code>system=[{"type": "text", "text": "..."}]</code> (a list of content blocks). The Claude Agent SDK (<code>ClaudeAgentOptions</code>) passes this as <code>--system-prompt</code> to the CLI, which expects a plain string. Passing a list causes <code>'list' object has no attribute 'get'</code> — auth is not the problem.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Passes Messages-API list straight through</div>
+          <pre><code class="language-python">system_prompt = kwargs.get("system", "")
+# kwargs["system"] is often:
+# [{"type": "text", "text": "You are...", "cache_control": {...}}]
+# → system_prompt is a list
+# → SDK does .get(...) on it → AttributeError</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Flatten to string before passing to SDK</div>
+          <pre><code class="language-python">def _system_prompt_for_cli(system) -> str:
+    if isinstance(system, str):
+        return system
+    if isinstance(system, list):
+        return "\n\n".join(
+            block["text"]
+            for block in system
+            if block.get("type") == "text"
+        )
+    return ""
+
+system_prompt = _system_prompt_for_cli(kwargs.get("system", ""))</code></pre>
+        </div>
+      </div>
+      <div class="alert warn"><strong>Rule:</strong> Any seam that swaps Messages API kwargs into the CLI/SDK must flatten <code>system</code> before use. Add a unit test that passes a list <code>system</code> and asserts <code>options.system_prompt</code> is <code>str</code>.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">Subscription tenants: every LLM call needs the same guard</div><div class="card-sub">Ungating one call site and forgetting the others leaves the rest 503ing</div></div></div>
+    <div class="card-body">
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ Hard-coded API key check blocks subscription tenants</div>
+          <pre><code class="language-python">def ask(prompt: str, ...) -> str:
+    if not settings.anthropic_api_key:
+        raise LlmNotConfigured("ANTHROPIC_API_KEY is not set")
+    client = Anthropic(api_key=settings.anthropic_api_key)
+    # → 503 for any tenant on subscription billing
+    #   even though they have CLAUDE_CODE_OAUTH_TOKEN</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Shared guard that covers both paths</div>
+          <pre><code class="language-python">def ask(prompt: str, ...) -> str:
+    _require_llm_configured()   # raises if neither key is set
+    client = Anthropic(
+        api_key=settings.anthropic_api_key or "unused-subscription"
+    )
+    # _require_llm_configured checks:
+    # settings.anthropic_api_key OR settings.subscription_active</code></pre>
+        </div>
+      </div>
+      <div class="alert info"><strong>Pattern:</strong> When you ungate one <code>*_ask</code> call site, grep for every other function that calls <code>Anthropic(api_key=...)</code> and do the same. Test <code>ask()</code> with empty <code>ANTHROPIC_API_KEY</code> and <code>subscription_active=True</code>.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><div><div class="card-title">AG (Assurance Grid) API contract: every response must include a <code>cell</code> object</div><div class="card-sub">Including 4xx — otherwise the UI stores <code>undefined</code> and crashes on <code>.state</code></div></div></div>
+    <div class="card-body">
+      <p>The AG UI does <code>const data = await res.json(); setCellLocal(job.docId, job.colId, data.cell)</code> on every response — no <code>res.ok</code> check. If the server returns a 403 with just <code>{"error": "..."}</code>, <code>data.cell</code> is <code>undefined</code>. The next render reads <code>cell.state</code> → crash.</p>
+      <div class="diff-grid">
+        <div class="code-wrap">
+          <div class="code-label bad">❌ 403 with no cell — crashes the UI</div>
+          <pre><code class="language-python">if col_id.startswith(SECTION_PREFIX):
+    return JSONResponse(status_code=403, content={
+        "error": "section columns cannot be run directly"
+    })
+# → data.cell is undefined
+# → AssuranceGrid.tsx crashes: Cannot read properties
+#   of undefined (reading 'state')</code></pre>
+        </div>
+        <div class="code-wrap">
+          <div class="code-label good">✓ Always include cell — even on errors</div>
+          <pre><code class="language-python">if col_id.startswith(SECTION_PREFIX):
+    # Return 200 with live harvest cell, or not_found
+    return JSONResponse(status_code=200, content={
+        "cell": {"state": "not_found", "note": "section column"}
+    })
+
+# On any LlmApiError:
+return JSONResponse(status_code=502, content={
+    "detail": "Anthropic API error: ...",
+    "cell": {"state": "error", "note": str(exc)}
+})</code></pre>
+        </div>
+      </div>
+      <div class="alert warn"><strong>OverlayCard scroll:</strong> If you embed the Assurance Grid in an <code>OverlayCard</code>, set the host wrapper to <code>overflow-hidden</code> + <code>flex min-h-0 flex-col</code>. An <code>overflow-y-auto</code> parent clips extra grid rows and steals wheel events because the grid's inner wrapper expects a bounded <code>height: 100%</code> ancestor.</div>
     </div>
   </div>
 </div>
